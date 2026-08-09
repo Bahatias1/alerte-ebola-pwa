@@ -49,7 +49,8 @@ const MainApp: React.FC = () => {
       case 'map':               return <MapPage />;
       case 'report':            return <ReportPage onBack={() => setRoute('home')} />;
       case 'my_reports':        return <MyReportsPage />;
-      case 'forms':             return <FormsPage />;
+      case 'forms':             return <FormsPage initialTab="forms" />;
+      case 'idsr_center':       return <FormsPage initialTab="definitions" />;
       case 'knowledge':         return <KnowledgePage />;
       case 'notifications':     return <NotificationsPage />;
       case 'profile':           return <ProfilePage onNavigate={navigate} />;

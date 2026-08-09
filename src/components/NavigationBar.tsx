@@ -2,7 +2,7 @@ import React from 'react';
 import {
   FileText, BookOpen, Activity, User, PlusCircle, ShieldAlert,
   TestTube, Users, Settings, X, ChevronRight, PhoneCall,
-  RefreshCw, Download, HelpCircle, LogOut, Home, Map, Bell, Menu
+  RefreshCw, Download, HelpCircle, LogOut, Home, Map, Bell, Menu, ClipboardList, Info
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { UserRole } from '../types';
@@ -12,6 +12,7 @@ export type Route =
   | 'map' 
   | 'report' 
   | 'forms' 
+  | 'idsr_center'
   | 'knowledge' 
   | 'my_reports' 
   | 'notifications' 
@@ -81,35 +82,39 @@ export const NavigationBar: React.FC<NavigationProps> = ({
     { id: 'profile', label: 'Profil & Paramètres', icon: <User size={20} />, section: 'MON COMPTE' }
   );
 
-  // ── MOBILE DRAWER ITEMS (EXCLUDES Home, Map, Alerts as per CORE PRINCIPLE PART 1) ──
-  const drawerItems: { id: Route | 'action_logout' | 'action_sync'; label: string; icon: React.ReactNode; section?: string; action?: () => void }[] = [
-    { id: 'forms', label: lang === 'fr' ? 'Centre IDSR Officielles' : 'IDSR Official Center', icon: <FileText size={20} color="var(--accent-mint)" />, section: 'CENTRE IDSR & SITES' },
-    { id: 'knowledge', label: lang === 'fr' ? 'Centre de Connaissances OMS' : 'WHO Knowledge Center', icon: <BookOpen size={20} /> },
-    { id: 'my_reports', label: lang === 'fr' ? 'Mes Investigations & Rapports' : 'My Investigations & Reports', icon: <Activity size={20} />, section: 'GESTION DE TERRAIN' },
+  // ── MOBILE DRAWER ITEMS — exact spec: IDSR Center, Knowledge Center, Official Forms,
+  // My Investigations, Synchronization, Downloads, Settings, About, Help, Logout
+  const drawerItems: { key: string; id: Route | 'action_logout' | 'action_sync'; label: string; icon: React.ReactNode; section?: string; action?: () => void }[] = [
+    { key: 'idsr_center', id: 'idsr_center', label: lang === 'fr' ? 'Centre IDSR' : 'IDSR Center', icon: <ClipboardList size={20} color="var(--accent-mint)" />, section: lang === 'fr' ? 'SURVEILLANCE & FORMULAIRES' : 'SURVEILLANCE & FORMS' },
+    { key: 'knowledge', id: 'knowledge', label: lang === 'fr' ? 'Centre de Connaissances' : 'Knowledge Center', icon: <BookOpen size={20} /> },
+    { key: 'forms', id: 'forms', label: lang === 'fr' ? 'Formulaires Officiels' : 'Official Forms', icon: <FileText size={20} /> },
+    { key: 'my_reports', id: 'my_reports', label: lang === 'fr' ? 'Mes Investigations' : 'My Investigations', icon: <Activity size={20} />, section: lang === 'fr' ? 'TERRAIN' : 'FIELD WORK' },
   ];
 
   if (role === 'HEALTH_AGENT' || role === 'ADMIN' || role === 'SUPERVISOR' || role === 'SUPER_ADMIN') {
-    drawerItems.push({ id: 'agent_portal', label: 'Espace Agent de Santé', icon: <Activity size={20} color="#F59E0B" />, section: 'SUITE PROFESSIONNELLE' });
+    drawerItems.push({ key: 'agent_portal', id: 'agent_portal', label: lang === 'fr' ? 'Espace Agent de Santé' : 'Health Agent Space', icon: <Activity size={20} color="#F59E0B" />, section: lang === 'fr' ? 'SUITE PROFESSIONNELLE' : 'PROFESSIONAL SUITE' });
   }
   if (role === 'LABORATORY' || role === 'ADMIN' || role === 'SUPER_ADMIN') {
-    drawerItems.push({ id: 'lab_portal', label: 'Laboratoire INRB', icon: <TestTube size={20} color="#8B5CF6" />, section: role === 'LABORATORY' ? 'SUITE PROFESSIONNELLE' : undefined });
+    drawerItems.push({ key: 'lab_portal', id: 'lab_portal', label: lang === 'fr' ? 'Laboratoire INRB' : 'INRB Laboratory', icon: <TestTube size={20} color="#8B5CF6" /> });
   }
   if (role === 'SUPERVISOR' || role === 'ADMIN' || role === 'SUPER_ADMIN') {
-    drawerItems.push({ id: 'supervisor_portal', label: 'Supervision Régionale', icon: <Users size={20} color="#3B82F6" />, section: role === 'SUPERVISOR' ? 'SUITE PROFESSIONNELLE' : undefined });
+    drawerItems.push({ key: 'supervisor_portal', id: 'supervisor_portal', label: lang === 'fr' ? 'Supervision Régionale' : 'Regional Supervision', icon: <Users size={20} color="#3B82F6" /> });
   }
   if (role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'ADMIN_SANTE') {
-    drawerItems.push({ id: 'admin_portal', label: 'Console Admin NIDSP', icon: <Settings size={20} color="var(--accent-mint)" />, section: 'ADMINISTRATION' });
+    drawerItems.push({ key: 'admin_portal', id: 'admin_portal', label: lang === 'fr' ? 'Console Admin NIDSP' : 'NIDSP Admin Console', icon: <Settings size={20} color="var(--accent-mint)" />, section: lang === 'fr' ? 'ADMINISTRATION' : 'ADMINISTRATION' });
   }
 
   drawerItems.push(
-    { id: 'action_sync', label: isSyncing ? (lang === 'fr' ? 'Synchronisation...' : 'Syncing...') : (lang === 'fr' ? 'Synchronisation Hors-Ligne' : 'Offline Sync'), icon: <RefreshCw size={20} color="#3B82F6" className={isSyncing ? 'animate-spin' : ''} />, section: 'OUTILS & SYNC', action: syncOfflineReports },
-    { id: 'downloads', label: lang === 'fr' ? 'Téléchargements & Rapprochements' : 'Downloads & Reports', icon: <Download size={20} /> },
-    { id: 'profile', label: lang === 'fr' ? 'Profil & Paramètres' : 'Profile & Settings', icon: <User size={20} />, section: 'COMPTE & PARAMÈTRES' },
-    { id: 'help', label: lang === 'fr' ? 'Aide & À Propos' : 'Help & About', icon: <HelpCircle size={20} /> }
+    { key: 'sync', id: 'action_sync', label: isSyncing ? (lang === 'fr' ? 'Synchronisation...' : 'Syncing...') : (lang === 'fr' ? 'Synchronisation' : 'Synchronization'), icon: <RefreshCw size={20} color="#3B82F6" className={isSyncing ? 'animate-spin' : ''} />, section: lang === 'fr' ? 'OUTILS' : 'TOOLS', action: syncOfflineReports },
+    { key: 'downloads', id: 'downloads', label: lang === 'fr' ? 'Téléchargements' : 'Downloads', icon: <Download size={20} /> },
+    { key: 'settings', id: 'profile', label: lang === 'fr' ? 'Paramètres' : 'Settings', icon: <Settings size={20} />, section: lang === 'fr' ? 'COMPTE' : 'ACCOUNT' },
+    { key: 'about', id: 'help', label: lang === 'fr' ? 'À Propos' : 'About', icon: <Info size={20} /> },
+    { key: 'help', id: 'help', label: lang === 'fr' ? 'Aide' : 'Help', icon: <HelpCircle size={20} /> }
   );
 
   if (user) {
     drawerItems.push({
+      key: 'logout',
       id: 'action_logout',
       label: lang === 'fr' ? 'Déconnexion' : 'Logout',
       icon: <LogOut size={20} color="#EF4444" />,
@@ -237,7 +242,7 @@ export const NavigationBar: React.FC<NavigationProps> = ({
             const needsAuth = ['my_reports'].includes(item.id) && !user;
 
             return (
-              <React.Fragment key={item.id}>
+              <React.Fragment key={item.key}>
                 {item.section && (
                   <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '14px 20px 4px' }}>
                     {item.section}

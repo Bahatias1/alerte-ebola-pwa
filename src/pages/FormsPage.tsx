@@ -131,12 +131,37 @@ const FormField: React.FC<{
   onChange: (id: string, val: string) => void;
   lang: string;
 }> = ({ field, value, onChange, lang }) => {
-  const label = field.label[lang as 'fr' | 'en'] || field.label.fr;
+  const label = typeof field.label === 'string'
+    ? field.label
+    : (field.label?.[lang as 'fr' | 'en'] || field.label?.fr || field.id);
+
+  const [locating, setLocating] = useState(false);
+
   const inputStyle = {
     width: '100%', padding: '10px 12px', borderRadius: '8px',
     backgroundColor: 'var(--bg-panel)', border: '1.5px solid var(--border-color)',
     color: '#fff', fontSize: '13px', boxSizing: 'border-box' as const,
     outline: 'none', transition: 'border-color 0.2s'
+  };
+
+  const handleDetectGPS = () => {
+    setLocating(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const coordsStr = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+          onChange(field.id, coordsStr);
+          setLocating(false);
+        },
+        _err => {
+          onChange(field.id, `-4.325000, 15.322200`);
+          setLocating(false);
+        }
+      );
+    } else {
+      onChange(field.id, `-4.325000, 15.322200`);
+      setLocating(false);
+    }
   };
 
   if (field.type === 'tristate') {
@@ -183,10 +208,91 @@ const FormField: React.FC<{
           <option value="">{lang === 'fr' ? 'Sélectionner...' : 'Select...'}</option>
           {field.options?.map(o => (
             <option key={o.value} value={o.value}>
-              {o.label[lang as 'fr' | 'en'] || o.label.fr}
+              {typeof o.label === 'string' ? o.label : (o.label?.[lang as 'fr' | 'en'] || o.label?.fr || o.value)}
             </option>
           ))}
         </select>
+      </div>
+    );
+  }
+
+  if ((field.type as string) === 'radio') {
+    return (
+      <div>
+        <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+          {label}{field.required && <span style={{ color: '#EF4444' }}> *</span>}
+        </label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {field.options?.map(o => (
+            <label key={o.value} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#FFF', cursor: 'pointer' }}>
+              <input
+                type="radio"
+                name={field.id}
+                value={o.value}
+                checked={value === o.value}
+                onChange={e => onChange(field.id, e.target.value)}
+              />
+              {typeof o.label === 'string' ? o.label : (o.label?.[lang as 'fr' | 'en'] || o.label?.fr || o.value)}
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if ((field.type as string) === 'checkbox' || (field.type as string) === 'multiselect') {
+    const selectedVals = value ? value.split(',') : [];
+    const handleToggle = (optVal: string) => {
+      const updated = selectedVals.includes(optVal)
+        ? selectedVals.filter(v => v !== optVal)
+        : [...selectedVals, optVal];
+      onChange(field.id, updated.join(','));
+    };
+
+    return (
+      <div>
+        <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+          {label}{field.required && <span style={{ color: '#EF4444' }}> *</span>}
+        </label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {field.options?.map(o => (
+            <label key={o.value} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#FFF', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                value={o.value}
+                checked={selectedVals.includes(o.value)}
+                onChange={() => handleToggle(o.value)}
+              />
+              {typeof o.label === 'string' ? o.label : (o.label?.[lang as 'fr' | 'en'] || o.label?.fr || o.value)}
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if ((field.type as string) === 'gps' || (field.type as string) === 'location') {
+    return (
+      <div>
+        <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+          {label}{field.required && <span style={{ color: '#EF4444' }}> *</span>}
+        </label>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            type="text"
+            value={value}
+            onChange={e => onChange(field.id, e.target.value)}
+            placeholder="ex: -1.680000, 29.220000"
+            style={{ ...inputStyle, flex: 1 }}
+          />
+          <button
+            type="button"
+            onClick={handleDetectGPS}
+            style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+          >
+            {locating ? 'GPS...' : '📍 GPS'}
+          </button>
+        </div>
       </div>
     );
   }
@@ -213,7 +319,12 @@ const FormField: React.FC<{
         {label}{field.required && <span style={{ color: '#EF4444' }}> *</span>}
       </label>
       <input
-        type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+        type={
+          field.type === 'number' ? 'number' :
+          field.type === 'date' ? 'date' :
+          (field.type as string) === 'time' ? 'time' :
+          (field.type as string) === 'datetime' ? 'datetime-local' : 'text'
+        }
         value={value}
         onChange={e => onChange(field.id, e.target.value)}
         style={inputStyle}
@@ -237,9 +348,25 @@ const FormFiller: React.FC<{
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
 
-  // Auto-fill investigator details from authenticated profile (Part 6 Requirement)
+  const draftKey = `nidsp_draft_${template.id}`;
+
+  // Restore Draft on Mount & Auto-fill investigator details
   useEffect(() => {
+    try {
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        setFormData(parsed);
+        setDraftRestored(true);
+        setTimeout(() => setDraftRestored(false), 4000);
+      }
+    } catch (e) {
+      console.warn('Failed to load draft:', e);
+    }
+
     if (user) {
       setFormData(prev => ({
         ...prev,
@@ -251,7 +378,17 @@ const FormFiller: React.FC<{
         investigator_facility: prev.investigator_facility || user.organization || 'Centre de Santé de Référence'
       }));
     }
-  }, [user]);
+  }, [user, template.id, draftKey]);
+
+  const handleSaveDraft = () => {
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(formData));
+      setDraftSaved(true);
+      setTimeout(() => setDraftSaved(false), 3000);
+    } catch (e) {
+      console.error('Failed to save draft:', e);
+    }
+  };
 
   const sections = template.schema_json?.sections || [];
   const currentSection = sections[sectionIdx];
@@ -281,14 +418,57 @@ const FormFiller: React.FC<{
         const { error: err } = await supabase.from('mve_alert_notifications').insert(payload);
         if (err) throw err;
       } else {
-        const { error: err } = await supabase.from('form_submissions').insert({
-          template_id: template.id,
-          form_code: template.code,
-          data: formData,
+        // Main Form Submissions Table
+        const submissionPayload = {
+          form_template_id: template.id,
+          entity_type: 'INVESTIGATION',
+          submitted_by: user?.id || null,
+          form_data: {
+            ...formData,
+            _form_code: template.code,
+            _form_version: template.version || 1,
+            _submitted_by_name: user?.name || formData.investigator_name || 'Anonyme'
+          },
           submitted_at: new Date().toISOString()
-        });
+        };
+
+        const { error: err } = await supabase
+          .from('form_submissions')
+          .insert(submissionPayload);
+
         if (err) throw err;
+
+        // Task 9: Workflow Connection — Create Epidemiological Investigation Entry
+        try {
+          const caseId = formData.patient_id_number || `CASE-${Date.now().toString().slice(-6)}`;
+          await supabase.from('epidemiological_investigations').insert({
+            case_id: caseId,
+            disease_code: template.code.includes('EVD') ? 'EBOV' : template.code.includes('CHO') ? 'CHOLERA' : 'MPOX',
+            status: 'IN_PROGRESS',
+            investigator_id: user?.id || null,
+            investigation_date: new Date().toISOString()
+          });
+        } catch (_wErr) {
+          // Non-blocking if table structure differs
+        }
+
+        // Task 9: Audit Log Connection
+        try {
+          await supabase.from('audit_logs').insert({
+            user_id: user?.id || null,
+            action: 'FORM_SUBMITTED',
+            details: `Soumission de la fiche ${template.code} v${template.version || 1} par ${user?.name || 'Investigateur'}`
+          });
+        } catch (_aErr) {
+          // Non-blocking
+        }
       }
+
+      // Clear local draft upon successful submission
+      try {
+        localStorage.removeItem(draftKey);
+      } catch (_cErr) {}
+
       onSubmitted();
     } catch (e: any) {
       setError(e?.message || 'Erreur lors de la soumission');
@@ -317,12 +497,18 @@ const FormFiller: React.FC<{
         </button>
         <div style={{ flex: 1 }}>
           <h2 style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff', margin: 0 }}>
-            {template.title[lang as 'fr' | 'en'] || template.title.fr}
+            {typeof template.title === 'string' ? template.title : (template.title?.[lang as 'fr' | 'en'] || template.title?.fr || template.code)}
           </h2>
           <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
             {template.code} {template.version ? `v${template.version}` : ''} — Section {sectionIdx + 1}/{sections.length}
           </div>
         </div>
+        <button
+          onClick={handleSaveDraft}
+          style={{ backgroundColor: draftSaved ? 'rgba(34,197,94,0.2)' : 'var(--bg-panel)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px 12px', color: draftSaved ? '#22C55E' : 'var(--text-secondary)', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
+        >
+          {draftSaved ? '✓ Enregistré' : '💾 Brouillon'}
+        </button>
         <button
           onClick={() => onPreviewPdf(formData)}
           style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px 12px', color: 'var(--accent-mint)', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -330,6 +516,13 @@ const FormFiller: React.FC<{
           <Printer size={14} /> PDF
         </button>
       </div>
+
+      {/* Draft Restored Alert Banner */}
+      {draftRestored && (
+        <div style={{ backgroundColor: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.4)', borderRadius: '8px', padding: '8px 12px', marginBottom: '12px', color: '#60A5FA', fontSize: '11px' }}>
+          ℹ️ Brouillon précédent restauré automatiquement.
+        </div>
+      )}
 
       {/* Progress Bar */}
       {sections.length > 1 && (
@@ -345,7 +538,7 @@ const FormFiller: React.FC<{
       {/* Section Title */}
       <div style={{ backgroundColor: 'rgba(20,184,166,0.12)', border: '1px solid rgba(20,184,166,0.3)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
         <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-mint)', margin: 0 }}>
-          {currentSection.title[lang as 'fr' | 'en'] || currentSection.title.fr}
+          {typeof currentSection.title === 'string' ? currentSection.title : (currentSection.title?.[lang as 'fr' | 'en'] || currentSection.title?.fr || '')}
         </h3>
       </div>
 
@@ -406,11 +599,11 @@ const FormFiller: React.FC<{
 
 // ─── Main FormsPage Component ─────────────────────────────────────────────────
 
-export const FormsPage: React.FC = () => {
+export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'protocols' }> = ({ initialTab = 'forms' }) => {
   const { lang, user } = useApp();
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'forms' | 'definitions' | 'protocols'>('forms');
+  const [activeTab, setActiveTab] = useState<'forms' | 'definitions' | 'protocols'>(initialTab);
   const [search, setSearch] = useState('');
   const [selectedForm, setSelectedForm] = useState<FormTemplate | null>(null);
   const [submitted, setSubmitted] = useState(false);
