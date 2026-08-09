@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type { UserRole } from '../types';
+import { canAccessOfficialForms, normalizeRole } from '../lib/roles';
 
 export type Route = 
   | 'home' 
@@ -44,15 +45,17 @@ export const NavigationBar: React.FC<NavigationProps> = ({
   const role: UserRole = user?.role || 'PUBLIC_USER';
 
   const getRoleLabel = (r: UserRole) => {
-    switch (r) {
+    switch (normalizeRole(r)) {
       case 'SUPER_ADMIN': return 'SUPER ADMIN';
-      case 'ADMIN': case 'ADMIN_SANTE': return 'ADMINISTRATEUR';
-      case 'SUPERVISOR': return 'SUPERVISEUR';
+      case 'ADMIN': return 'ADMINISTRATEUR';
+      case 'MODERATOR': return 'SUPERVISEUR';
       case 'LABORATORY': return 'LABORATOIRE INRB';
       case 'HEALTH_AGENT': return 'AGENT DE SANTÉ';
       default: return 'CITOYEN';
     }
   };
+
+  const isFieldStaff = canAccessOfficialForms(role);
 
   // ── DESKTOP SIDEBAR ITEMS (Full Navigation) ───────────────────────────
   const desktopItems: { id: Route; label: string; icon: React.ReactNode; section?: string }[] = [
@@ -63,41 +66,47 @@ export const NavigationBar: React.FC<NavigationProps> = ({
     { id: 'notifications', label: 'Alertes & Notifications', icon: <Bell size={20} /> },
   ];
 
-  if (role === 'HEALTH_AGENT' || role === 'ADMIN' || role === 'SUPERVISOR' || role === 'SUPER_ADMIN') {
+  if (isFieldStaff && normalizeRole(role) !== 'LABORATORY') {
     desktopItems.push({ id: 'agent_portal', label: 'Espace Agent de Santé', icon: <Activity size={20} color="#F59E0B" />, section: 'SUITE PROFESSIONNELLE' });
   }
-  if (role === 'LABORATORY' || role === 'ADMIN' || role === 'SUPER_ADMIN') {
+  if (role === 'LABORATORY' || role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'ADMIN_SANTE') {
     desktopItems.push({ id: 'lab_portal', label: 'Laboratoire INRB', icon: <TestTube size={20} color="#8B5CF6" />, section: role === 'LABORATORY' ? 'SUITE PROFESSIONNELLE' : undefined });
   }
-  if (role === 'SUPERVISOR' || role === 'ADMIN' || role === 'SUPER_ADMIN') {
-    desktopItems.push({ id: 'supervisor_portal', label: 'Supervision Régionale', icon: <Users size={20} color="#3B82F6" />, section: role === 'SUPERVISOR' ? 'SUITE PROFESSIONNELLE' : undefined });
+  if (normalizeRole(role) === 'MODERATOR' || role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'ADMIN_SANTE') {
+    desktopItems.push({ id: 'supervisor_portal', label: 'Supervision Régionale', icon: <Users size={20} color="#3B82F6" />, section: role === 'SUPERVISOR' || role === 'MODERATOR' ? 'SUITE PROFESSIONNELLE' : undefined });
   }
   if (role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'ADMIN_SANTE') {
     desktopItems.push({ id: 'admin_portal', label: 'Console Admin NIDSP', icon: <Settings size={20} color="var(--accent-mint)" />, section: 'ADMINISTRATION' });
   }
 
   desktopItems.push(
-    { id: 'forms', label: 'Centre IDSR & Fiches Officielles', icon: <FileText size={20} />, section: 'RESSOURCES' },
-    { id: 'knowledge', label: 'Centre de Connaissances OMS', icon: <BookOpen size={20} /> },
+    ...(isFieldStaff
+      ? [{ id: 'forms' as Route, label: 'Centre IDSR & Fiches Officielles', icon: <FileText size={20} />, section: 'RESSOURCES' }]
+      : []),
+    { id: 'knowledge', label: 'Centre de Connaissances OMS', icon: <BookOpen size={20} />, section: isFieldStaff ? undefined : 'RESSOURCES' },
     { id: 'profile', label: 'Profil & Paramètres', icon: <User size={20} />, section: 'MON COMPTE' }
   );
 
   // ── MOBILE DRAWER ITEMS — exact spec: IDSR Center, Knowledge Center, Official Forms,
   // My Investigations, Synchronization, Downloads, Settings, About, Help, Logout
   const drawerItems: { key: string; id: Route | 'action_logout' | 'action_sync'; label: string; icon: React.ReactNode; section?: string; action?: () => void }[] = [
-    { key: 'idsr_center', id: 'idsr_center', label: lang === 'fr' ? 'Centre IDSR' : 'IDSR Center', icon: <ClipboardList size={20} color="var(--accent-mint)" />, section: lang === 'fr' ? 'SURVEILLANCE & FORMULAIRES' : 'SURVEILLANCE & FORMS' },
-    { key: 'knowledge', id: 'knowledge', label: lang === 'fr' ? 'Centre de Connaissances' : 'Knowledge Center', icon: <BookOpen size={20} /> },
-    { key: 'forms', id: 'forms', label: lang === 'fr' ? 'Formulaires Officiels' : 'Official Forms', icon: <FileText size={20} /> },
+    ...(isFieldStaff
+      ? [
+          { key: 'idsr_center', id: 'idsr_center' as const, label: lang === 'fr' ? 'Centre IDSR' : 'IDSR Center', icon: <ClipboardList size={20} color="var(--accent-mint)" />, section: lang === 'fr' ? 'SURVEILLANCE & FORMULAIRES' : 'SURVEILLANCE & FORMS' },
+          { key: 'forms', id: 'forms' as const, label: lang === 'fr' ? 'Formulaires Officiels' : 'Official Forms', icon: <FileText size={20} /> },
+        ]
+      : []),
+    { key: 'knowledge', id: 'knowledge', label: lang === 'fr' ? 'Centre de Connaissances' : 'Knowledge Center', icon: <BookOpen size={20} />, section: isFieldStaff ? undefined : (lang === 'fr' ? 'RESSOURCES' : 'RESOURCES') },
     { key: 'my_reports', id: 'my_reports', label: lang === 'fr' ? 'Mes Investigations' : 'My Investigations', icon: <Activity size={20} />, section: lang === 'fr' ? 'TERRAIN' : 'FIELD WORK' },
   ];
 
-  if (role === 'HEALTH_AGENT' || role === 'ADMIN' || role === 'SUPERVISOR' || role === 'SUPER_ADMIN') {
+  if (isFieldStaff && normalizeRole(role) !== 'LABORATORY') {
     drawerItems.push({ key: 'agent_portal', id: 'agent_portal', label: lang === 'fr' ? 'Espace Agent de Santé' : 'Health Agent Space', icon: <Activity size={20} color="#F59E0B" />, section: lang === 'fr' ? 'SUITE PROFESSIONNELLE' : 'PROFESSIONAL SUITE' });
   }
   if (role === 'LABORATORY' || role === 'ADMIN' || role === 'SUPER_ADMIN') {
     drawerItems.push({ key: 'lab_portal', id: 'lab_portal', label: lang === 'fr' ? 'Laboratoire INRB' : 'INRB Laboratory', icon: <TestTube size={20} color="#8B5CF6" /> });
   }
-  if (role === 'SUPERVISOR' || role === 'ADMIN' || role === 'SUPER_ADMIN') {
+  if (normalizeRole(role) === 'MODERATOR' || role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'ADMIN_SANTE') {
     drawerItems.push({ key: 'supervisor_portal', id: 'supervisor_portal', label: lang === 'fr' ? 'Supervision Régionale' : 'Regional Supervision', icon: <Users size={20} color="#3B82F6" /> });
   }
   if (role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'ADMIN_SANTE') {
