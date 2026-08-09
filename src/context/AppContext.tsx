@@ -49,9 +49,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [healthCenters, setHealthCenters] = useState<HealthCenter[]>([]);
   const [epidemicStats, setEpidemicStats] = useState<EpidemicStats | null>(null);
   const [hasUnreadAlerts, setHasUnreadAlerts] = useState<boolean>(false);
-  const [diseases] = useState<Disease[]>(DEFAULT_DISEASES);
+  const [diseases, setDiseases] = useState<Disease[]>(DEFAULT_DISEASES);
   const [selectedDisease, setSelectedDisease] = useState<Disease | null>(DEFAULT_DISEASES[0]);
   const [myReports, setMyReports] = useState<ReportedCase[]>([]);
+
+  // Load authoritative disease catalog from Supabase (fallback: DEFAULT_DISEASES)
+  useEffect(() => {
+    if (!isOnline) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('disease_catalog')
+          .select('id, code, name, category, is_active, risk_color_hex')
+          .eq('is_active', true)
+          .order('code');
+        if (cancelled || error || !data?.length) return;
+        const mapped: Disease[] = data.map((d: any) => ({
+          id: d.id,
+          code: d.code,
+          name: d.name || { fr: d.code, en: d.code },
+          family: d.category,
+          isActive: d.is_active !== false,
+        }));
+        setDiseases(mapped);
+        setSelectedDisease((prev) => {
+          if (prev) {
+            const match = mapped.find((d) => d.code === prev.code || d.id === prev.id);
+            if (match) return match;
+          }
+          return mapped.find((d) => d.code === 'EBOV') || mapped[0];
+        });
+      } catch (e) {
+        console.error('Failed to load disease_catalog:', e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOnline]);
 
   // Monitor network status
   useEffect(() => {
@@ -301,6 +335,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (reportsData) {
           const mapped: ReportedCase[] = reportsData.map(r => ({
             id: r.id,
+            diseaseId: r.disease_id || r.suspected_disease_id || undefined,
             fullName: r.full_name || '',
             phone: r.phone || '',
             location: r.health_zone_name || r.province_name || '',
