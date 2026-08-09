@@ -7,6 +7,7 @@ import {
   Printer, Send, ClipboardList, BookOpen, FlaskConical
 } from 'lucide-react';
 import { OfficialFormPdfGenerator } from '../components/OfficialFormPdfGenerator';
+import { canAccessOfficialForms } from '../lib/roles';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -78,6 +79,19 @@ const CASE_DEFINITIONS = [
     lab: 'Selles fraîches ou écouvillon rectal → laboratoire provincial',
     cfrRange: '1–5%',
     color: '#3B82F6'
+  },
+  {
+    code: 'MEASLES',
+    name: 'Rougeole',
+    suspect: [
+      'Fièvre et éruption maculopapuleuse généralisée',
+      'ET toux ou coryza ou conjonctivite',
+    ],
+    probable: ['Cas suspect avec lien épidémiologique à un cas confirmé'],
+    confirmed: ['IgM positif ou PCR rougeole positive'],
+    lab: 'Sérum / écouvillon nasopharyngé → laboratoire provincial / INRB',
+    cfrRange: '<1–5%',
+    color: '#7C3AED'
   }
 ];
 
@@ -340,10 +354,12 @@ const FormFiller: React.FC<{
   template: FormTemplate;
   lang: string;
   user: any;
+  diseaseId?: string | null;
+  diseaseCode?: string | null;
   onBack: () => void;
   onSubmitted: () => void;
   onPreviewPdf: (data: Record<string, string>) => void;
-}> = ({ template, lang, user, onBack, onSubmitted, onPreviewPdf }) => {
+}> = ({ template, lang, user, diseaseId, diseaseCode, onBack, onSubmitted, onPreviewPdf }) => {
   const [sectionIdx, setSectionIdx] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -405,6 +421,18 @@ const FormFiller: React.FC<{
     try {
       const targetTable = template.schema_json?.target_table || 'form_submissions';
 
+      const resolvedDiseaseCode =
+        diseaseCode ||
+        (template.code.includes('MVE') || template.code.includes('EBOV') || template.code.includes('EVD')
+          ? 'EBOV'
+          : template.code.includes('CHOLERA') || template.code.includes('CHO')
+            ? 'CHOLERA'
+            : template.code.includes('MPOX')
+              ? 'MPOX'
+              : template.code.includes('MEASLES')
+                ? 'MEASLES'
+                : diseaseCode || 'UNKNOWN');
+
       if (targetTable === 'mve_alert_notifications') {
         const payload: Record<string, any> = {};
         sections.forEach(s => s.fields.forEach(f => {
@@ -418,18 +446,31 @@ const FormFiller: React.FC<{
         const { error: err } = await supabase.from('mve_alert_notifications').insert(payload);
         if (err) throw err;
       } else {
-        // Main Form Submissions Table
-        const submissionPayload = {
+        // entity_id is NOT NULL in NIDSP schema — use investigation id when known, else new UUID
+        const entityId =
+          (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+        const submissionPayload: Record<string, unknown> = {
           form_template_id: template.id,
           entity_type: 'INVESTIGATION',
+          entity_id: entityId,
+          disease_id: diseaseId || template.disease_id || null,
           submitted_by: user?.id || null,
           form_data: {
             ...formData,
             _form_code: template.code,
             _form_version: template.version || 1,
-            _submitted_by_name: user?.name || formData.investigator_name || 'Anonyme'
+            _submitted_by_name: user?.name || formData.investigator_name || 'Anonyme',
+            _disease_id: diseaseId || template.disease_id || null,
+            _disease_code: resolvedDiseaseCode,
+            full_name:
+              formData.full_name ||
+              [formData.patient_last_name, formData.patient_first_name].filter(Boolean).join(' ') ||
+              undefined,
           },
-          submitted_at: new Date().toISOString()
+          submitted_at: new Date().toISOString(),
         };
 
         const { error: err } = await supabase
@@ -438,28 +479,26 @@ const FormFiller: React.FC<{
 
         if (err) throw err;
 
-        // Task 9: Workflow Connection — Create Epidemiological Investigation Entry
         try {
           const caseId = formData.patient_id_number || `CASE-${Date.now().toString().slice(-6)}`;
           await supabase.from('epidemiological_investigations').insert({
             case_id: caseId,
-            disease_code: template.code.includes('EVD') ? 'EBOV' : template.code.includes('CHO') ? 'CHOLERA' : 'MPOX',
+            disease_code: resolvedDiseaseCode,
             status: 'IN_PROGRESS',
             investigator_id: user?.id || null,
-            investigation_date: new Date().toISOString()
+            investigation_date: new Date().toISOString(),
           });
-        } catch (_wErr) {
+        } catch {
           // Non-blocking if table structure differs
         }
 
-        // Task 9: Audit Log Connection
         try {
           await supabase.from('audit_logs').insert({
             user_id: user?.id || null,
             action: 'FORM_SUBMITTED',
-            details: `Soumission de la fiche ${template.code} v${template.version || 1} par ${user?.name || 'Investigateur'}`
+            details: `Soumission de la fiche ${template.code} v${template.version || 1} (${resolvedDiseaseCode}) par ${user?.name || 'Investigateur'}`,
           });
-        } catch (_aErr) {
+        } catch {
           // Non-blocking
         }
       }
@@ -467,7 +506,9 @@ const FormFiller: React.FC<{
       // Clear local draft upon successful submission
       try {
         localStorage.removeItem(draftKey);
-      } catch (_cErr) {}
+      } catch {
+        // ignore storage errors
+      }
 
       onSubmitted();
     } catch (e: any) {
@@ -600,7 +641,7 @@ const FormFiller: React.FC<{
 // ─── Main FormsPage Component ─────────────────────────────────────────────────
 
 export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'protocols' }> = ({ initialTab = 'forms' }) => {
-  const { lang, user } = useApp();
+  const { lang, user, selectedDisease, diseases } = useApp();
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'forms' | 'definitions' | 'protocols'>(initialTab);
@@ -639,8 +680,23 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
     const titleFr = t.title?.fr || '';
     const titleEn = t.title?.en || '';
     const s = search.toLowerCase();
-    return titleFr.toLowerCase().includes(s) || titleEn.toLowerCase().includes(s) || t.code.toLowerCase().includes(s);
+    const matchesSearch =
+      titleFr.toLowerCase().includes(s) ||
+      titleEn.toLowerCase().includes(s) ||
+      t.code.toLowerCase().includes(s);
+    if (!matchesSearch) return false;
+    // Disease scope: disease-specific templates + generic (null disease_id)
+    if (selectedDisease) {
+      return !t.disease_id || t.disease_id === selectedDisease.id;
+    }
+    return true;
   });
+
+  const diseaseNameForTemplate = (t: FormTemplate | null) => {
+    if (!t) return undefined;
+    const d = diseases.find((x) => x.id === t.disease_id) || selectedDisease;
+    return d?.name?.fr || d?.code;
+  };
 
   const card = (extra?: any) => ({
     backgroundColor: 'var(--bg-card)',
@@ -650,12 +706,29 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
     ...extra
   });
 
+  if (!canAccessOfficialForms(user?.role)) {
+    return (
+      <div style={{ padding: '32px 24px', textAlign: 'center' }}>
+        <AlertTriangle size={36} color="#F59E0B" style={{ marginBottom: 12 }} />
+        <h2 style={{ color: '#fff', fontSize: 18, margin: '0 0 8px' }}>
+          {lang === 'fr' ? 'Accès réservé aux agents' : 'Agents only'}
+        </h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+          {lang === 'fr'
+            ? 'Les fiches d\'investigation officielles sont réservées aux agents de santé, superviseurs et administrateurs.'
+            : 'Official investigation forms are restricted to health agents, supervisors, and administrators.'}
+        </p>
+      </div>
+    );
+  }
+
   if (pdfPreviewData && selectedForm) {
     return (
       <OfficialFormPdfGenerator
         formTitle={selectedForm.title[lang as 'fr' | 'en'] || selectedForm.title.fr}
         formCode={selectedForm.code}
         version={selectedForm.version || 1}
+        diseaseName={diseaseNameForTemplate(selectedForm)}
         data={pdfPreviewData}
         sections={selectedForm.schema_json?.sections || []}
         onClose={() => setPdfPreviewData(null)}
@@ -696,6 +769,11 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
           template={selectedForm}
           lang={lang}
           user={user}
+          diseaseId={selectedForm.disease_id || selectedDisease?.id}
+          diseaseCode={
+            diseases.find((d) => d.id === (selectedForm.disease_id || selectedDisease?.id))?.code ||
+            selectedDisease?.code
+          }
           onBack={() => setSelectedForm(null)}
           onSubmitted={() => setSubmitted(true)}
           onPreviewPdf={data => setPdfPreviewData(data)}
