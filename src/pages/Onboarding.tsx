@@ -36,9 +36,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onFinished }) => {
         {step === 1 && (
           <div style={styles.stepContent} className="animate-fade">
             <HeartPulse size={64} color="var(--accent-mint)" className="pulse-green" style={styles.icon} />
-            <h1 style={styles.title}>Alert Disease RDC</h1>
+            <h1 style={styles.title}>Alert EBOLA</h1>
             <p style={styles.subtitle}>
-              Système officiel de surveillance sanitaire et de signalement en République Démocratique du Congo.
+              Plateforme nationale de surveillance multi-maladies et de signalement citoyen en République Démocratique du Congo.
             </p>
             
             <div style={styles.langSelector}>
