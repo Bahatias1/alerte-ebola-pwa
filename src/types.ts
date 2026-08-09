@@ -3,6 +3,7 @@ export type UserRole =
   | 'HEALTH_AGENT' 
   | 'LABORATORY' 
   | 'SUPERVISOR' 
+  | 'MODERATOR'
   | 'ADMIN' 
   | 'SUPER_ADMIN' 
   | 'USER' 
@@ -29,6 +30,8 @@ export interface UserProfile {
 export interface ReportedCase {
   id?: string;
   userId?: string;
+  diseaseId?: string;
+  diseaseCode?: string;
   fullName: string;
   phone: string;
   location: string;
