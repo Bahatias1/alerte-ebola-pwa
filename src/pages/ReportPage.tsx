@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { supabase } from '../supabaseClient';
 import { db } from '../db';
 import type { ReportedCase } from '../types';
+import { newClientId } from '../lib/ids';
+import { buildReportedCasePayload } from '../services/formPayload';
+import { enqueueAndSync } from '../services/outboxSync';
 import {
   PlusCircle, MapPin, Camera, AlertTriangle, CheckCircle,
   Loader, WifiOff
@@ -66,8 +68,9 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    const clientId = newClientId();
     const report: ReportedCase = {
-      id: isOnline ? undefined : `offline_${Date.now()}`,
+      id: clientId,
       fullName: patientName,
       phone: patientPhone,
       location,
@@ -75,35 +78,28 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
       description,
       status: 'Suspect',
       latitude: coords?.lat,
-      longitude: coords?.lon
+      longitude: coords?.lon,
+      diseaseId,
     };
 
     try {
-      if (isOnline) {
-        const insertPayload: any = {
-          full_name: patientName,
-          phone: patientPhone,
-          symptoms: selectedSymptoms.join(', '),
-          description,
-          status: 'Suspect',
-          disease_id: diseaseId || null
-        };
-        if (user) insertPayload.user_id = user.id;
-        if (coords) {
-          insertPayload.geom = `POINT(${coords.lon} ${coords.lat})`;
-        }
-        const { data, error } = await supabase.from('reported_cases').insert(insertPayload).select();
-        if (!error && data?.[0]) {
-          report.id = data[0].id;
-          report.createdAt = data[0].created_at;
-        } else if (error) {
-          console.error('Supabase insert error:', error.message);
-        }
-      } else {
-        // Save offline
-        await db.reportedCases.put(report);
+      const payload = buildReportedCasePayload({
+        clientSubmissionId: clientId,
+        fullName: patientName,
+        phone: patientPhone,
+        symptoms: selectedSymptoms.join(', '),
+        description,
+        location,
+        diseaseId: diseaseId || null,
+        userId: user?.id,
+        latitude: coords?.lat,
+        longitude: coords?.lon,
+      });
+      const result = await enqueueAndSync('reported_cases', payload, clientId);
+      if (!result.synced && !result.offline) {
+        console.error('Supabase insert error:', result.error);
       }
-
+      await db.reportedCases.put(report);
       setMyReports([report, ...myReports]);
       setStep('done');
     } catch (e) {

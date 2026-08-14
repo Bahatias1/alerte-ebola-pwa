@@ -8,6 +8,13 @@ import {
 } from 'lucide-react';
 import { OfficialFormPdfGenerator } from '../components/OfficialFormPdfGenerator';
 import { canAccessOfficialForms } from '../lib/roles';
+import { newClientId } from '../lib/ids';
+import {
+  buildFormSubmissionPayload,
+  buildMveInsertPayload,
+  missingRequiredFields,
+} from '../services/formPayload';
+import { enqueueAndSync } from '../services/outboxSync';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -357,7 +364,7 @@ const FormFiller: React.FC<{
   diseaseId?: string | null;
   diseaseCode?: string | null;
   onBack: () => void;
-  onSubmitted: () => void;
+  onSubmitted: (offline: boolean) => void;
   onPreviewPdf: (data: Record<string, string>) => void;
 }> = ({ template, lang, user, diseaseId, diseaseCode, onBack, onSubmitted, onPreviewPdf }) => {
   const [sectionIdx, setSectionIdx] = useState(0);
@@ -419,98 +426,51 @@ const FormFiller: React.FC<{
     setSubmitting(true);
     setError(null);
     try {
-      const targetTable = template.schema_json?.target_table || 'form_submissions';
-
-      const resolvedDiseaseCode =
-        diseaseCode ||
-        (template.code.includes('MVE') || template.code.includes('EBOV') || template.code.includes('EVD')
-          ? 'EBOV'
-          : template.code.includes('CHOLERA') || template.code.includes('CHO')
-            ? 'CHOLERA'
-            : template.code.includes('MPOX')
-              ? 'MPOX'
-              : template.code.includes('MEASLES')
-                ? 'MEASLES'
-                : diseaseCode || 'UNKNOWN');
-
-      if (targetTable === 'mve_alert_notifications') {
-        const payload: Record<string, any> = {};
-        sections.forEach(s => s.fields.forEach(f => {
-          const v = formData[f.id];
-          if (v !== undefined && v !== '') {
-            if (f.type === 'boolean') payload[f.id] = v === 'true';
-            else if (f.type === 'number') payload[f.id] = parseInt(v) || null;
-            else payload[f.id] = v;
-          }
-        }));
-        const { error: err } = await supabase.from('mve_alert_notifications').insert(payload);
-        if (err) throw err;
-      } else {
-        // entity_id is NOT NULL in NIDSP schema — use investigation id when known, else new UUID
-        const entityId =
-          (typeof crypto !== 'undefined' && crypto.randomUUID)
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-        const submissionPayload: Record<string, unknown> = {
-          form_template_id: template.id,
-          entity_type: 'INVESTIGATION',
-          entity_id: entityId,
-          disease_id: diseaseId || template.disease_id || null,
-          submitted_by: user?.id || null,
-          form_data: {
-            ...formData,
-            _form_code: template.code,
-            _form_version: template.version || 1,
-            _submitted_by_name: user?.name || formData.investigator_name || 'Anonyme',
-            _disease_id: diseaseId || template.disease_id || null,
-            _disease_code: resolvedDiseaseCode,
-            full_name:
-              formData.full_name ||
-              [formData.patient_last_name, formData.patient_first_name].filter(Boolean).join(' ') ||
-              undefined,
-          },
-          submitted_at: new Date().toISOString(),
-        };
-
-        const { error: err } = await supabase
-          .from('form_submissions')
-          .insert(submissionPayload);
-
-        if (err) throw err;
-
-        try {
-          const caseId = formData.patient_id_number || `CASE-${Date.now().toString().slice(-6)}`;
-          await supabase.from('epidemiological_investigations').insert({
-            case_id: caseId,
-            disease_code: resolvedDiseaseCode,
-            status: 'IN_PROGRESS',
-            investigator_id: user?.id || null,
-            investigation_date: new Date().toISOString(),
-          });
-        } catch {
-          // Non-blocking if table structure differs
-        }
-
-        try {
-          await supabase.from('audit_logs').insert({
-            user_id: user?.id || null,
-            action: 'FORM_SUBMITTED',
-            details: `Soumission de la fiche ${template.code} v${template.version || 1} (${resolvedDiseaseCode}) par ${user?.name || 'Investigateur'}`,
-          });
-        } catch {
-          // Non-blocking
-        }
+      const missing = missingRequiredFields(sections, formData);
+      if (missing.length > 0) {
+        throw new Error(
+          lang === 'fr'
+            ? `Champs obligatoires manquants : ${missing.join(', ')}`
+            : `Required fields missing: ${missing.join(', ')}`
+        );
       }
 
-      // Clear local draft upon successful submission
+      const targetTable = template.schema_json?.target_table === 'mve_alert_notifications'
+        ? 'mve_alert_notifications'
+        : 'form_submissions';
+      const clientSubmissionId = newClientId();
+
+      const payload = targetTable === 'mve_alert_notifications'
+        ? buildMveInsertPayload({
+            formData,
+            sections,
+            userId: user?.id,
+            clientSubmissionId,
+          })
+        : buildFormSubmissionPayload({
+            templateId: template.id,
+            templateCode: template.code,
+            templateVersion: template.version,
+            formData,
+            userId: user?.id,
+            userName: user?.name,
+            diseaseId: diseaseId || template.disease_id || null,
+            diseaseCode,
+            clientSubmissionId,
+          });
+
+      const result = await enqueueAndSync(targetTable, payload, clientSubmissionId);
+      if (!result.synced && !result.offline) {
+        throw new Error(result.error || 'Erreur lors de la soumission');
+      }
+
       try {
         localStorage.removeItem(draftKey);
       } catch {
         // ignore storage errors
       }
 
-      onSubmitted();
+      onSubmitted(result.offline);
     } catch (e: any) {
       setError(e?.message || 'Erreur lors de la soumission');
     } finally {
@@ -648,6 +608,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
   const [search, setSearch] = useState('');
   const [selectedForm, setSelectedForm] = useState<FormTemplate | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedOffline, setSubmittedOffline] = useState(false);
   const [pdfPreviewData, setPdfPreviewData] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
@@ -747,12 +708,16 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
           {lang === 'fr' ? 'Fiche Soumise avec Succès' : 'Form Successfully Submitted'}
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6, maxWidth: '300px', margin: 0 }}>
-          {lang === 'fr'
-            ? 'La fiche d\'investigation officielle a été enregistrée dans la base de données nationale NIDSP.'
-            : 'The official investigation form has been recorded in the NIDSP national database.'}
+          {submittedOffline
+            ? (lang === 'fr'
+              ? 'Hors-ligne : la fiche est enregistrée localement et sera synchronisée automatiquement dès le retour de la connexion.'
+              : 'Offline: the form is saved locally and will sync automatically when connectivity returns.')
+            : (lang === 'fr'
+              ? 'La fiche d\'investigation officielle a été enregistrée dans la base de données nationale NIDSP.'
+              : 'The official investigation form has been recorded in the NIDSP national database.')}
         </p>
         <button
-          onClick={() => { setSubmitted(false); setSelectedForm(null); }}
+          onClick={() => { setSubmitted(false); setSubmittedOffline(false); setSelectedForm(null); }}
           style={{ padding: '13px 36px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
         >
           {lang === 'fr' ? 'Retour aux Fiches' : 'Back to Forms'}
@@ -775,7 +740,10 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
             selectedDisease?.code
           }
           onBack={() => setSelectedForm(null)}
-          onSubmitted={() => setSubmitted(true)}
+          onSubmitted={(offline) => {
+            setSubmittedOffline(offline);
+            setSubmitted(true);
+          }}
           onPreviewPdf={data => setPdfPreviewData(data)}
         />
       </div>

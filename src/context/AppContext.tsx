@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { db } from '../db';
 import type { UserProfile, EbolaAlert, OfficialSource, HealthCenter, EpidemicStats, ReportedCase, Disease } from '../types';
+import { syncPendingOutbox } from '../services/outboxSync';
 
 interface AppContextType {
   user: UserProfile | null;
@@ -159,8 +160,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync Offline Reports
   const syncOfflineReports = async () => {
-    if (!navigator.onLine || !user) return;
+    if (!navigator.onLine) return;
     try {
+      await syncPendingOutbox();
+      if (!user) return;
       const unsynced = await db.reportedCases.where('status').equals('Suspect').toArray();
       const offlineUnsynced = unsynced.filter(r => !r.id || r.id.startsWith('offline_'));
       if (offlineUnsynced.length === 0) return;
@@ -169,8 +172,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (report.latitude && report.longitude) {
           geomString = `POINT(${report.longitude} ${report.latitude})`;
         }
-        const { id, ...supabaseData } = report;
-        const insertData = { ...supabaseData, user_id: user.id, geom: geomString };
+        const id = report.id;
+        const insertData: Record<string, unknown> = {
+          full_name: report.fullName,
+          phone: report.phone,
+          symptoms: report.symptoms,
+          description: report.description,
+          status: 'Suspect',
+          location: report.location,
+          geom: geomString,
+        };
+        if (report.diseaseId) insertData.disease_id = report.diseaseId;
         const { data, error } = await supabase.from('reported_cases').insert(insertData).select();
         if (!error && data && data.length > 0) {
           if (id) await db.reportedCases.delete(id);

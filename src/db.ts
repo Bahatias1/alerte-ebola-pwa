@@ -11,6 +11,7 @@ import type {
   HealthCenter,
   EpidemicStats
 } from './types';
+import type { FormOutboxItem } from './services/outboxTypes';
 
 export class AlertEbolaDatabase extends Dexie {
   userProfiles!: Table<UserProfile, string>;
@@ -23,6 +24,7 @@ export class AlertEbolaDatabase extends Dexie {
   officialSources!: Table<OfficialSource, string>;
   healthCenters!: Table<HealthCenter, string>;
   epidemicStats!: Table<EpidemicStats, number>;
+  formOutbox!: Table<FormOutboxItem, string>;
 
   constructor() {
     super('AlertEbolaDatabase');
@@ -40,6 +42,10 @@ export class AlertEbolaDatabase extends Dexie {
       officialSources: 'id, sourceType, fetchedAt, publishedAt',
       healthCenters: 'id, province, verified',
       epidemicStats: 'id'
+    });
+
+    this.version(2).stores({
+      formOutbox: 'id, status, targetTable, createdAt'
     });
   }
 }
