@@ -10,34 +10,66 @@ interface UserRow {
   created_at: string;
 }
 
+interface AuditRow {
+  id: string;
+  action: string;
+  user: string;
+  time: string;
+  status: string;
+}
+
 export const AdminPortal: React.FC = () => {
   const { diseases } = useApp();
   const [activeTab, setActiveTab] = useState<'users' | 'catalog' | 'rules' | 'audits'>('users');
   const [usersList, setUsersList] = useState<UserRow[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditRow[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const { data, error } = await supabase.from('users').select('*').limit(20);
-      if (!error && data) {
-        setUsersList(data.map((u: any) => ({
-          id: u.id,
-          name: u.full_name || u.name || 'Utilisateur',
-          email: u.email || 'N/A',
-          role: u.role || 'PUBLIC_USER',
-          created_at: u.created_at || new Date().toISOString()
-        })));
-      } else {
-        // Fallback default list
-        setUsersList([
-          { id: '1', name: 'Dr. Jean-Jacques Muyembe', email: 'muyembe@inrb.cd', role: 'SUPER_ADMIN', created_at: '2026-01-01' },
-          { id: '2', name: 'Agent de Santé Bikoro', email: 'agent.bikoro@minsante.cd', role: 'HEALTH_AGENT', created_at: '2026-02-15' },
-          { id: '3', name: 'Tech Lab INRB', email: 'lab@inrb.cd', role: 'LABORATORY', created_at: '2026-03-10' },
-          { id: '4', name: 'Superviseur Équateur', email: 'sup.equateur@minsante.cd', role: 'SUPERVISOR', created_at: '2026-04-01' }
+    const fetchAdminData = async () => {
+      try {
+        setLoading(true);
+        const [
+          { data: uData },
+          { data: aData }
+        ] = await Promise.all([
+          supabase.from('users').select('*').limit(20),
+          supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(20)
         ]);
+
+        if (uData && uData.length > 0) {
+          setUsersList(uData.map((u: any) => ({
+            id: u.id,
+            name: u.full_name || u.name || 'Utilisateur',
+            email: u.email || '—',
+            role: u.role || 'PUBLIC_USER',
+            created_at: u.created_at || new Date().toISOString()
+          })));
+        } else {
+          setUsersList([]);
+        }
+
+        if (aData && aData.length > 0) {
+          setAuditLogs(aData.map((a: any) => ({
+            id: a.id,
+            action: a.action || 'Événement système',
+            user: a.actor_id || a.user_id || 'Système',
+            time: a.created_at ? new Date(a.created_at).toLocaleString('fr-FR') : 'Récemment',
+            status: 'Enregistré'
+          })));
+        } else {
+          setAuditLogs([]);
+        }
+      } catch (e) {
+        console.error('Error fetching admin portal data:', e);
+        setUsersList([]);
+        setAuditLogs([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUsers();
+    fetchAdminData();
   }, []);
 
   const card = {
@@ -63,10 +95,10 @@ export const AdminPortal: React.FC = () => {
       {/* Navigation Tabs */}
       <div style={{ display: 'flex', gap: '6px', backgroundColor: 'var(--bg-panel)', padding: '4px', borderRadius: '10px' }}>
         {[
-          { key: 'users', label: '👥 Utilisateurs RBAC' },
-          { key: 'catalog', label: '🛡️ Catalogue Maladie' },
-          { key: 'rules', label: '⚙️ Moteur de Règles' },
-          { key: 'audits', label: '📜 Journaux Audit' }
+          { key: 'users', label: `👥 Utilisateurs (${usersList.length})` },
+          { key: 'catalog', label: `🛡️ Catalogue (${diseases.length})` },
+          { key: 'rules', label: '⚙️ Règles Métier' },
+          { key: 'audits', label: `📜 Audit (${auditLogs.length})` }
         ].map(tab => (
           <button
             key={tab.key}
@@ -86,21 +118,29 @@ export const AdminPortal: React.FC = () => {
       {/* TAB 1: USERS RBAC */}
       {activeTab === 'users' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {usersList.map(u => (
-            <div key={u.id} style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>{u.name}</h3>
-                <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{u.email}</p>
-              </div>
-              <span style={{
-                fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '6px',
-                color: u.role === 'SUPER_ADMIN' ? '#EC4899' : u.role === 'HEALTH_AGENT' ? '#F59E0B' : u.role === 'LABORATORY' ? '#8B5CF6' : 'var(--accent-mint)',
-                backgroundColor: u.role === 'SUPER_ADMIN' ? 'rgba(236, 72, 153, 0.2)' : u.role === 'HEALTH_AGENT' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(20, 184, 166, 0.2)'
-              }}>
-                {u.role}
-              </span>
+          {loading ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>Chargement des utilisateurs...</div>
+          ) : usersList.length === 0 ? (
+            <div style={{ ...card, padding: '32px', textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Aucun utilisateur enregistré dans la base</p>
             </div>
-          ))}
+          ) : (
+            usersList.map(u => (
+              <div key={u.id} style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>{u.name}</h3>
+                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{u.email}</p>
+                </div>
+                <span style={{
+                  fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '6px',
+                  color: u.role === 'SUPER_ADMIN' ? '#EC4899' : u.role === 'HEALTH_AGENT' ? '#F59E0B' : u.role === 'LABORATORY' ? '#8B5CF6' : 'var(--accent-mint)',
+                  backgroundColor: u.role === 'SUPER_ADMIN' ? 'rgba(236, 72, 153, 0.2)' : u.role === 'HEALTH_AGENT' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(20, 184, 166, 0.2)'
+                }}>
+                  {u.role}
+                </span>
+              </div>
+            ))
+          )}
         </div>
       )}
 
@@ -127,7 +167,7 @@ export const AdminPortal: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {[
             { rule: 'Déclenchement automatique d\'alerte sanitaire', trigger: '3 cas suspects dans la même Zone de Santé en < 48h', status: 'ACTIF' },
-            { rule: 'Attribution automatique d\'enquêteur terrain', trigger: 'Nouveau cas d\'Ebola ou Marburg soumis', status: 'ACTIF' },
+            { rule: 'Attribution automatique d\'enquêteur terrain', trigger: 'Nouveau cas soumis', status: 'ACTIF' },
             { rule: 'Notification SMS / Push d\'Urgence OMS', trigger: 'Validation cas positif par laboratoire INRB', status: 'ACTIF' }
           ].map(r => (
             <div key={r.rule} style={card}>
@@ -146,19 +186,23 @@ export const AdminPortal: React.FC = () => {
       {/* TAB 4: AUDIT LOGS */}
       {activeTab === 'audits' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {[
-            { action: 'INSERT reported_cases', user: 'agent.bikoro@minsante.cd', time: 'Aujourd\'hui 14:22', status: '200 OK' },
-            { action: 'UPDATE result PCR positive', user: 'lab@inrb.cd', time: 'Aujourd\'hui 12:10', status: '200 OK' },
-            { action: 'UPSERT user_role -> HEALTH_AGENT', user: 'muyembe@inrb.cd', time: 'Hier 18:40', status: '200 OK' }
-          ].map(log => (
-            <div key={log.time} style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF' }}>{log.action}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Par {log.user} • {log.time}</div>
-              </div>
-              <span style={{ fontSize: '11px', color: 'var(--accent-mint)', fontWeight: 'bold' }}>{log.status}</span>
+          {loading ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>Chargement des journaux...</div>
+          ) : auditLogs.length === 0 ? (
+            <div style={{ ...card, padding: '32px', textAlign: 'center' }}>
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Aucun journal d'audit disponible</p>
             </div>
-          ))}
+          ) : (
+            auditLogs.map(log => (
+              <div key={log.id} style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF' }}>{log.action}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Par {log.user} • {log.time}</div>
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--accent-mint)', fontWeight: 'bold' }}>{log.status}</span>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>

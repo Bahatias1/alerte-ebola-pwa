@@ -107,7 +107,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Cas Confirmés</span>
             <TrendingUp size={16} color="var(--accent-mint)" />
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FFF' }}>{epidemicStats?.totalCases ?? '142'}</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FFF' }}>{epidemicStats?.totalCases ?? 0}</div>
           <span style={{ fontSize: '10px', color: 'var(--accent-mint)' }}>Cumul épidémique</span>
         </div>
 
@@ -116,7 +116,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Guérisons</span>
             <ShieldCheck size={16} color="var(--accent-mint)" />
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-mint)' }}>{epidemicStats?.recovered ?? '98'}</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-mint)' }}>{epidemicStats?.recovered ?? 0}</div>
           <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Prise en charge</span>
         </div>
 

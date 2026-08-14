@@ -308,22 +308,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setHealthCenters(mappedCenters);
       }
 
-      // 4. Epidemic Stats
-      const { data: statsData, error: statsErr } = await supabase.from('stats_updates').select();
-      if (!statsErr && statsData && statsData.length > 0) {
-        const totalCases = statsData.reduce((acc, curr) => acc + (curr.confirmed_cases || 0), 0);
-        const totalDeaths = statsData.reduce((acc, curr) => acc + (curr.total_deaths || 0), 0);
-        const recovered = Math.max(0, Math.floor(totalCases * 0.78));
-        const globalStats: EpidemicStats = {
-          totalCases,
-          recovered,
-          deaths: totalDeaths,
-          weeklyTrend: 4,
-          lastUpdated: new Date().toISOString()
-        };
-        await db.epidemicStats.put({ ...globalStats, id: 1 });
-        setEpidemicStats(globalStats);
-      }
+      // 4. Epidemic Stats (Real DB aggregation)
+      const [{ data: epiCasesData }, { data: repCasesData }, { data: offStatsData }] = await Promise.all([
+        supabase.from('epidemiological_cases').select('id, current_status, created_at'),
+        supabase.from('reported_cases').select('id, status, created_at'),
+        supabase.from('official_statistics').select('*').order('report_date', { ascending: false }).limit(1)
+      ]);
+
+      const epiList = epiCasesData || [];
+      const repList = repCasesData || [];
+      const latestOffStat = offStatsData?.[0];
+
+      const confirmedReports = repList.filter(r => (r.status || '').toLowerCase().includes('valid')).length;
+      const epiConfirmed = epiList.length;
+      const totalCases = latestOffStat?.confirmed_cases ?? (confirmedReports + epiConfirmed);
+      const totalDeaths = latestOffStat?.total_deaths ?? epiList.filter(c => c.current_status === 'DECEASED').length;
+      const recovered = latestOffStat?.recovered ?? epiList.filter(c => c.current_status === 'RECOVERED').length;
+
+      // Weekly trend: cases in last 7 days
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const recentCasesCount = repList.filter(r => r.created_at >= sevenDaysAgo).length +
+        epiList.filter(c => c.created_at >= sevenDaysAgo).length;
+
+      const globalStats: EpidemicStats = {
+        totalCases,
+        recovered,
+        deaths: totalDeaths,
+        weeklyTrend: recentCasesCount,
+        lastUpdated: new Date().toISOString()
+      };
+      await db.epidemicStats.put({ ...globalStats, id: 1 });
+      setEpidemicStats(globalStats);
 
       // 5. My Reports (for authenticated user)
       if (user) {
