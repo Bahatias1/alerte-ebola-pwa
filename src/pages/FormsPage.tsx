@@ -154,7 +154,7 @@ const FormField: React.FC<{
   const inputStyle = {
     width: '100%', padding: '10px 12px', borderRadius: '8px',
     backgroundColor: 'var(--bg-panel)', border: '1.5px solid var(--border-color)',
-    color: '#fff', fontSize: '13px', boxSizing: 'border-box' as const,
+    color: 'var(--text-primary)', fontSize: '13px', boxSizing: 'border-box' as const,
     outline: 'none', transition: 'border-color 0.2s'
   };
 
@@ -238,7 +238,7 @@ const FormField: React.FC<{
         </label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {field.options?.map(o => (
-            <label key={o.value} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#FFF', cursor: 'pointer' }}>
+            <label key={o.value} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
               <input
                 type="radio"
                 name={field.id}
@@ -270,7 +270,7 @@ const FormField: React.FC<{
         </label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {field.options?.map(o => (
-            <label key={o.value} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#FFF', cursor: 'pointer' }}>
+            <label key={o.value} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 value={o.value}
@@ -302,7 +302,7 @@ const FormField: React.FC<{
           <button
             type="button"
             onClick={handleDetectGPS}
-            style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
           >
             {locating ? 'GPS...' : '📍 GPS'}
           </button>
@@ -537,7 +537,7 @@ const FormFiller: React.FC<{
           <ChevronLeft size={14} /> {lang === 'fr' ? 'Retour' : 'Back'}
         </button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff', margin: 0 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>
             {typeof template.title === 'string' ? template.title : (template.title?.[lang as 'fr' | 'en'] || template.title?.fr || template.code)}
           </h2>
           <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -577,7 +577,7 @@ const FormFiller: React.FC<{
       )}
 
       {/* Section Title */}
-      <div style={{ backgroundColor: 'rgba(20,184,166,0.12)', border: '1px solid rgba(20,184,166,0.3)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
+      <div style={{ backgroundColor: 'var(--primary-alpha-12)', border: '1px solid var(--primary-alpha-30)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
         <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-mint)', margin: 0 }}>
           {typeof currentSection.title === 'string' ? currentSection.title : (currentSection.title?.[lang as 'fr' | 'en'] || currentSection.title?.fr || '')}
         </h3>
@@ -616,7 +616,7 @@ const FormFiller: React.FC<{
         {!isLast ? (
           <button
             onClick={() => setSectionIdx(i => i + 1)}
-            style={{ flex: 2, padding: '13px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{ flex: 2, padding: '13px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
           >
             {lang === 'fr' ? 'Section Suivante' : 'Next Section'} <ChevronRight size={16} />
           </button>
@@ -624,7 +624,7 @@ const FormFiller: React.FC<{
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            style={{ flex: 2, padding: '13px', borderRadius: '10px', backgroundColor: submitting ? '#4B5563' : 'var(--accent-mint)', color: '#000', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'background-color 0.2s' }}
+            style={{ flex: 2, padding: '13px', borderRadius: '10px', backgroundColor: submitting ? '#4B5563' : 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'background-color 0.2s' }}
           >
             {submitting ? (
               <><Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> {lang === 'fr' ? 'Envoi...' : 'Sending...'}</>
@@ -710,7 +710,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
     return (
       <div style={{ padding: '32px 24px', textAlign: 'center' }}>
         <AlertTriangle size={36} color="#F59E0B" style={{ marginBottom: 12 }} />
-        <h2 style={{ color: '#fff', fontSize: 18, margin: '0 0 8px' }}>
+        <h2 style={{ color: 'var(--text-primary)', fontSize: 18, margin: '0 0 8px' }}>
           {lang === 'fr' ? 'Accès réservé aux agents' : 'Agents only'}
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
@@ -743,7 +743,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
         <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(34,197,94,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(34,197,94,0.4)' }}>
           <CheckCircle size={40} color="#22C55E" />
         </div>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF', margin: 0 }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>
           {lang === 'fr' ? 'Fiche Soumise avec Succès' : 'Form Successfully Submitted'}
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6, maxWidth: '300px', margin: 0 }}>
@@ -753,7 +753,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
         </p>
         <button
           onClick={() => { setSubmitted(false); setSelectedForm(null); }}
-          style={{ padding: '13px 36px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
+          style={{ padding: '13px 36px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
         >
           {lang === 'fr' ? 'Retour aux Fiches' : 'Back to Forms'}
         </button>
@@ -785,7 +785,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
   // ── MAIN LIST screen
   return (
     <div style={{ padding: '16px', paddingBottom: '90px' }}>
-      <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px', marginTop: 0 }}>
+      <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px', marginTop: 0 }}>
         {lang === 'fr' ? 'Centre IDSR' : 'IDSR Center'}
       </h1>
       <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px', marginTop: 0 }}>
@@ -808,7 +808,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
               flex: 1, padding: '8px 4px', borderRadius: '8px',
               fontSize: '11px', fontWeight: activeTab === tab.key ? 'bold' : 'normal',
               backgroundColor: activeTab === tab.key ? 'var(--accent-mint)' : 'transparent',
-              color: activeTab === tab.key ? '#000' : 'var(--text-secondary)',
+              color: activeTab === tab.key ? 'var(--primary-foreground)' : 'var(--text-secondary)',
               border: 'none', cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
@@ -827,7 +827,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
               placeholder={lang === 'fr' ? 'Rechercher une fiche...' : 'Search forms...'}
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ width: '100%', padding: '10px 10px 10px 34px', borderRadius: '10px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '10px 10px 10px 34px', borderRadius: '10px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '13px', boxSizing: 'border-box' }}
             />
           </div>
 
@@ -844,7 +844,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
                 return (
                   <div key={template.id} style={card()}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '10px', backgroundColor: 'rgba(20,184,166,0.2)', color: 'var(--accent-mint)', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+                      <span style={{ fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
                         {template.code}
                       </span>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
@@ -856,7 +856,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
                         )}
                       </div>
                     </div>
-                    <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF', marginBottom: '14px', marginTop: 0, lineHeight: 1.4 }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '14px', marginTop: 0, lineHeight: 1.4 }}>
                       {title}
                     </h3>
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -864,7 +864,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
                         onClick={() => setSelectedForm(template)}
                         style={{
                           flex: 1, padding: '11px', borderRadius: '8px',
-                          backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none',
+                          backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none',
                           fontWeight: 'bold', fontSize: '12px', cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                         }}
@@ -901,7 +901,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
           {CASE_DEFINITIONS.map(def => (
             <div key={def.code} style={{ ...card(), borderLeft: `4px solid ${def.color}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#FFF', margin: 0 }}>{def.name}</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{def.name}</h3>
                 <span style={{ fontSize: '10px', backgroundColor: `${def.color}1A`, color: def.color, padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                   CFR {def.cfrRange}
                 </span>
@@ -942,7 +942,7 @@ export const FormsPage: React.FC<{ initialTab?: 'forms' | 'definitions' | 'proto
           ].map(p => (
             <div key={p.title} style={{ ...card(), display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px', marginTop: 0 }}>{p.title}</h3>
+                <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px', marginTop: 0 }}>{p.title}</h3>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{p.source} • {p.year}</div>
               </div>
               <button style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px', color: 'var(--accent-mint)', cursor: 'pointer', flexShrink: 0 }}>

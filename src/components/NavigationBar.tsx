@@ -148,7 +148,7 @@ export const NavigationBar: React.FC<NavigationProps> = ({
         {/* Brand */}
         <div className="sidebar-brand">
           <div className="sidebar-brand-icon">
-            <ShieldAlert size={20} color="#FFF" />
+            <ShieldAlert size={20} color="var(--primary-foreground)" />
           </div>
           <div>
             <div className="sidebar-brand-text">Alert Disease</div>
@@ -218,7 +218,7 @@ export const NavigationBar: React.FC<NavigationProps> = ({
               <ShieldAlert size={20} color="var(--accent-mint)" />
             </div>
             <div>
-              <div style={{ fontSize: '15px', fontWeight: '800', color: '#FFF' }}>Alert Disease</div>
+              <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-primary)' }}>Alert Disease</div>
               <div style={{ fontSize: '10px', color: 'var(--accent-mint)', fontWeight: '700' }}>NIDSP RDC • WHO</div>
             </div>
           </div>
@@ -232,13 +232,13 @@ export const NavigationBar: React.FC<NavigationProps> = ({
         </div>
 
         {/* User Identity Banner in Drawer */}
-        <div style={{ padding: '14px 20px', backgroundColor: 'rgba(20, 184, 166, 0.08)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(20, 184, 166, 0.2)', border: '1px solid var(--accent-mint)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--accent-mint)' }}>
+        <div style={{ padding: '14px 20px', backgroundColor: 'var(--primary-alpha-08)', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--primary-alpha-20)', border: '1px solid var(--accent-mint)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--accent-mint)' }}>
             {user ? user.name[0].toUpperCase() : <User size={20} />}
           </div>
           <div>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>{user ? user.name : 'Utilisateur Public'}</div>
-            <span style={{ fontSize: '10px', backgroundColor: 'rgba(20, 184, 166, 0.2)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{user ? user.name : 'Utilisateur Public'}</div>
+            <span style={{ fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
               {getRoleLabel(role)}
             </span>
           </div>
@@ -266,7 +266,7 @@ export const NavigationBar: React.FC<NavigationProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '14px',
-                    backgroundColor: isActive ? 'rgba(20, 184, 166, 0.15)' : 'transparent',
+                    backgroundColor: isActive ? 'var(--primary-alpha-15)' : 'transparent',
                     color: item.id === 'action_logout' ? '#EF4444' : (isActive ? 'var(--accent-mint)' : 'var(--text-primary)'),
                     border: 'none',
                     borderLeft: isActive ? '4px solid var(--accent-mint)' : '4px solid transparent',
@@ -293,13 +293,13 @@ export const NavigationBar: React.FC<NavigationProps> = ({
           <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
             <button
               onClick={() => setLang('fr')}
-              style={{ flex: 1, minHeight: '36px', borderRadius: '6px', backgroundColor: lang === 'fr' ? 'var(--accent-mint)' : 'var(--bg-card)', color: lang === 'fr' ? '#000' : 'var(--text-secondary)', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
+              style={{ flex: 1, minHeight: '36px', borderRadius: '6px', backgroundColor: lang === 'fr' ? 'var(--accent-mint)' : 'var(--bg-card)', color: lang === 'fr' ? 'var(--primary-foreground)' : 'var(--text-secondary)', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
             >
               🇫🇷 Français
             </button>
             <button
               onClick={() => setLang('en')}
-              style={{ flex: 1, minHeight: '36px', borderRadius: '6px', backgroundColor: lang === 'en' ? 'var(--accent-mint)' : 'var(--bg-card)', color: lang === 'en' ? '#000' : 'var(--text-secondary)', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
+              style={{ flex: 1, minHeight: '36px', borderRadius: '6px', backgroundColor: lang === 'en' ? 'var(--accent-mint)' : 'var(--bg-card)', color: lang === 'en' ? 'var(--primary-foreground)' : 'var(--text-secondary)', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
             >
               🇬🇧 English
             </button>
@@ -340,7 +340,7 @@ export const NavigationBar: React.FC<NavigationProps> = ({
           title="Signaler un cas suspect"
           aria-label="Signaler un cas"
         >
-          <PlusCircle size={26} color="#000" />
+          <PlusCircle size={26} color="var(--primary-foreground)" />
         </button>
 
         {/* 4. Alertes */}

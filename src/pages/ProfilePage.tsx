@@ -47,17 +47,17 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* User Identity Card */}
       <div style={{
-        background: 'linear-gradient(135deg, #0B4F48 0%, #063A35 100%)',
+        background: 'var(--hero-gradient)',
         borderRadius: '16px',
         padding: '20px',
-        border: '1px solid rgba(20, 184, 166, 0.3)',
+        border: '1px solid var(--primary-alpha-30)',
         display: 'flex',
         alignItems: 'center',
         gap: '16px'
       }}>
         <div style={{
           width: '60px', height: '60px', borderRadius: '50%',
-          backgroundColor: 'rgba(20, 184, 166, 0.2)',
+          backgroundColor: 'var(--primary-alpha-20)',
           border: '2px solid var(--accent-mint)',
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
@@ -72,10 +72,10 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
 
         {user ? (
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#FFF' }}>{user.name}</h2>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{user.name}</h2>
             <p style={{ fontSize: '13px', color: 'var(--accent-mint)', marginBottom: '4px' }}>{user.email}</p>
             <span style={{
-              fontSize: '10px', backgroundColor: 'rgba(20, 184, 166, 0.2)',
+              fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)',
               color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold'
             }}>
               {user.role}
@@ -83,14 +83,14 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
           </div>
         ) : (
           <div>
-            <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>Utilisateur Anonyme</h2>
+            <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>Utilisateur Anonyme</h2>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px' }}>Connectez-vous pour accéder à toutes les fonctionnalités</p>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={() => onNavigate('auth')}
                 style={{
                   padding: '8px 16px', borderRadius: '8px',
-                  backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none',
+                  backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none',
                   fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
                 }}
               >
@@ -115,7 +115,7 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
       <div style={{ display: 'flex', gap: '10px' }}>
         <div style={{
           flex: 1, backgroundColor: 'var(--bg-card)', borderRadius: '12px',
-          padding: '12px', border: `1px solid ${isOnline ? 'rgba(20, 184, 166, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+          padding: '12px', border: `1px solid ${isOnline ? 'var(--primary-alpha-30)' : 'rgba(245, 158, 11, 0.3)'}`,
           display: 'flex', alignItems: 'center', gap: '10px'
         }}>
           {isOnline ? <Wifi size={18} color="var(--accent-mint)" /> : <WifiOff size={18} color="var(--warning)" />}
@@ -157,7 +157,7 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
               style={{
                 padding: '12px',
                 borderRadius: '10px',
-                backgroundColor: lang === l.code ? 'rgba(20, 184, 166, 0.15)' : 'var(--bg-card)',
+                backgroundColor: lang === l.code ? 'var(--primary-alpha-15)' : 'var(--bg-card)',
                 border: `1px solid ${lang === l.code ? 'var(--accent-mint)' : 'var(--border-color)'}`,
                 color: lang === l.code ? 'var(--accent-mint)' : 'var(--text-secondary)',
                 fontWeight: lang === l.code ? 'bold' : 'normal',
@@ -185,7 +185,7 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               {theme === 'dark' ? <Moon size={18} color="var(--accent-mint)" /> : <Sun size={18} color="var(--warning)" />}
               <div>
-                <div style={{ fontSize: '14px', color: '#FFF', fontWeight: '500' }}>Thème</div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: '500' }}>Thème</div>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{theme === 'dark' ? 'Sombre (recommandé)' : 'Clair'}</div>
               </div>
             </div>
@@ -199,7 +199,7 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
             >
               <div style={{
                 width: '18px', height: '18px', borderRadius: '50%',
-                backgroundColor: '#FFF',
+                backgroundColor: '#f3faff',
                 position: 'absolute', top: '3px',
                 left: theme === 'dark' ? '23px' : '3px',
                 transition: 'left 0.2s'
@@ -212,7 +212,7 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               {notifPermission === 'granted' ? <Bell size={18} color="var(--accent-mint)" /> : <BellOff size={18} color="var(--text-muted)" />}
               <div>
-                <div style={{ fontSize: '14px', color: '#FFF', fontWeight: '500' }}>Notifications Push</div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: '500' }}>Notifications Push</div>
                 <div style={{ fontSize: '11px', color: notifPermission === 'granted' ? 'var(--accent-mint)' : 'var(--text-muted)' }}>
                   {notifPermission === 'granted' ? 'Activées' : notifPermission === 'denied' ? 'Refusées (navigateur)' : 'Non configurées'}
                 </div>
@@ -221,7 +221,7 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
             {notifPermission !== 'granted' && notifPermission !== 'denied' && (
               <button
                 onClick={requestNotifications}
-                style={{ padding: '6px 12px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                style={{ padding: '6px 12px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
               >
                 Activer
               </button>
@@ -240,7 +240,7 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Activity size={18} color="var(--accent-mint)" />
               <div>
-                <div style={{ fontSize: '14px', color: '#FFF', fontWeight: '500' }}>NIDSP PWA</div>
+                <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: '500' }}>NIDSP PWA</div>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Portail National de Surveillance</div>
               </div>
             </div>
@@ -249,12 +249,12 @@ export const ProfilePage: React.FC<{ onNavigate: (route: string) => void }> = ({
           <div style={row}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <ShieldCheck size={18} color="var(--accent-mint)" />
-              <span style={{ fontSize: '14px', color: '#FFF' }}>Partenaires</span>
+              <span style={{ fontSize: '14px', color: 'var(--text-primary)' }}>Partenaires</span>
             </div>
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>OMS • MSP RDC • INRB</span>
           </div>
           <div style={lastRow}>
-            <span style={{ fontSize: '14px', color: '#FFF' }}>Backend</span>
+            <span style={{ fontSize: '14px', color: 'var(--text-primary)' }}>Backend</span>
             <span style={{ fontSize: '12px', color: 'var(--accent-mint)', fontWeight: 'bold' }}>Supabase PostgreSQL</span>
           </div>
         </div>

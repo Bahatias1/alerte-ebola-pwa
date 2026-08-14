@@ -11,7 +11,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   'Confirmé': { label: 'Confirmé', color: '#EF4444', icon: <CheckCircle size={14} /> },
   'rejected': { label: 'Invalidé', color: '#6B7280', icon: <XCircle size={14} /> },
   'Invalidé': { label: 'Invalidé', color: '#6B7280', icon: <XCircle size={14} /> },
-  'closed': { label: 'Dossier Fermé', color: '#14B8A6', icon: <CheckCircle size={14} /> },
+  'closed': { label: 'Dossier Fermé', color: 'var(--primary)', icon: <CheckCircle size={14} /> },
 };
 
 const formatDate = (dateStr?: string) => {
@@ -64,7 +64,7 @@ export const MyReportsPage: React.FC = () => {
     return (
       <div style={{ padding: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
         <Activity size={48} color="var(--accent-mint)" />
-        <h2 style={{ color: '#FFF', fontSize: '18px' }}>Connexion requise</h2>
+        <h2 style={{ color: 'var(--text-primary)', fontSize: '18px' }}>Connexion requise</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
           Connectez-vous pour accéder à votre historique de signalements.
         </p>
@@ -77,7 +77,7 @@ export const MyReportsPage: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF' }}>Mes Signalements</h1>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Mes Signalements</h1>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
             {myReports.length} signalement{myReports.length !== 1 ? 's' : ''} enregistré{myReports.length !== 1 ? 's' : ''}
           </p>
@@ -156,7 +156,7 @@ export const MyReportsPage: React.FC = () => {
                 </div>
 
                 {/* Row 2: Patient info */}
-                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>{report.fullName || 'Patient anonyme'}</h3>
+                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>{report.fullName || 'Patient anonyme'}</h3>
                 {report.location && (
                   <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>📍 {report.location}</p>
                 )}
@@ -197,7 +197,7 @@ export const MyReportsPage: React.FC = () => {
                                 backgroundColor: isDone ? 'var(--accent-mint)' : 'var(--border-color)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center'
                               }}>
-                                {isDone && <CheckCircle size={14} color="#000" />}
+                                {isDone && <CheckCircle size={14} color="var(--primary-foreground)" />}
                               </div>
                               <span style={{ fontSize: '9px', color: isDone ? 'var(--accent-mint)' : 'var(--text-muted)', textAlign: 'center', lineHeight: '1.2' }}>
                                 {s === 'Suspect' ? 'Soumis' : s === 'under_review' ? 'Investigation' : 'Classifié'}

@@ -58,7 +58,7 @@ export const EbolaHeader: React.FC<EbolaHeaderProps> = ({ onNavigate, onOpenDraw
             style={styles.diseaseSelect}
           >
             {diseases.map(d => (
-              <option key={d.id} value={d.id} style={{ backgroundColor: '#091E1C', color: '#fff' }}>
+              <option key={d.id} value={d.id} style={{ backgroundColor: 'var(--card)', color: 'var(--foreground)' }}>
                 {d.code} — {d.name.fr}
               </option>
             ))}
@@ -143,10 +143,10 @@ const styles = {
     fontSize: '10px',
     fontWeight: 700,
     color: 'var(--accent-mint)',
-    backgroundColor: 'rgba(20, 184, 166, 0.15)',
+    backgroundColor: 'var(--primary-alpha-15)',
     padding: '2px 8px',
     borderRadius: '10px',
-    border: '1px solid rgba(20, 184, 166, 0.3)'
+    border: '1px solid var(--primary-alpha-30)'
   },
   greeting: {
     fontSize: '13px',
@@ -198,7 +198,7 @@ const styles = {
     alignItems: 'center',
     gap: '4px',
     backgroundColor: 'var(--primary)',
-    color: 'white',
+    color: 'var(--primary-foreground)',
     padding: '6px 10px',
     borderRadius: '8px',
     fontSize: '11px',

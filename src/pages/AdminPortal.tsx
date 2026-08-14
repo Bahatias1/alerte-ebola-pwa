@@ -84,12 +84,12 @@ export const AdminPortal: React.FC = () => {
       {/* Header */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <span style={{ fontSize: '10px', backgroundColor: 'rgba(20, 184, 166, 0.2)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+          <span style={{ fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
             CONSOLE ADMINISTRATION NIDSP
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Enterprise Console v2.4</span>
         </div>
-        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF' }}>Gestion des Rôles (RBAC), Pathogènes & Règles</h1>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Gestion des Rôles (RBAC), Pathogènes & Règles</h1>
       </div>
 
       {/* Navigation Tabs */}
@@ -107,7 +107,7 @@ export const AdminPortal: React.FC = () => {
               flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
               fontSize: '12px', fontWeight: activeTab === tab.key ? 'bold' : 'normal',
               backgroundColor: activeTab === tab.key ? 'var(--accent-mint)' : 'transparent',
-              color: activeTab === tab.key ? '#000' : 'var(--text-secondary)', cursor: 'pointer'
+              color: activeTab === tab.key ? 'var(--primary-foreground)' : 'var(--text-secondary)', cursor: 'pointer'
             }}
           >
             {tab.label}
@@ -128,13 +128,13 @@ export const AdminPortal: React.FC = () => {
             usersList.map(u => (
               <div key={u.id} style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>{u.name}</h3>
+                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{u.name}</h3>
                   <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{u.email}</p>
                 </div>
                 <span style={{
                   fontSize: '11px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '6px',
                   color: u.role === 'SUPER_ADMIN' ? '#EC4899' : u.role === 'HEALTH_AGENT' ? '#F59E0B' : u.role === 'LABORATORY' ? '#8B5CF6' : 'var(--accent-mint)',
-                  backgroundColor: u.role === 'SUPER_ADMIN' ? 'rgba(236, 72, 153, 0.2)' : u.role === 'HEALTH_AGENT' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(20, 184, 166, 0.2)'
+                  backgroundColor: u.role === 'SUPER_ADMIN' ? 'rgba(236, 72, 153, 0.2)' : u.role === 'HEALTH_AGENT' ? 'rgba(245, 158, 11, 0.2)' : 'var(--primary-alpha-20)'
                 }}>
                   {u.role}
                 </span>
@@ -150,8 +150,8 @@ export const AdminPortal: React.FC = () => {
           {diseases.map(d => (
             <div key={d.id} style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#FFF' }}>{d.name.fr}</h3>
-                <span style={{ fontSize: '10px', backgroundColor: 'rgba(20, 184, 166, 0.2)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{d.name.fr}</h3>
+                <span style={{ fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
                   {d.code}
                 </span>
               </div>
@@ -172,7 +172,7 @@ export const AdminPortal: React.FC = () => {
           ].map(r => (
             <div key={r.rule} style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>{r.rule}</h3>
+                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{r.rule}</h3>
                 <span style={{ fontSize: '10px', backgroundColor: 'rgba(34, 197, 94, 0.2)', color: '#22C55E', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
                   {r.status}
                 </span>
@@ -196,7 +196,7 @@ export const AdminPortal: React.FC = () => {
             auditLogs.map(log => (
               <div key={log.id} style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF' }}>{log.action}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{log.action}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Par {log.user} • {log.time}</div>
                 </div>
                 <span style={{ fontSize: '11px', color: 'var(--accent-mint)', fontWeight: 'bold' }}>{log.status}</span>

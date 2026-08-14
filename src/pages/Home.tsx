@@ -27,10 +27,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       
       {/* 1. National Outbreak & Disease Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, #0B4F48 0%, #063A35 100%)',
+        background: 'var(--hero-gradient)',
         borderRadius: '16px',
         padding: '20px',
-        border: '1px solid rgba(20, 184, 166, 0.3)',
+        border: '1px solid var(--primary-alpha-30)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
         display: 'flex',
         flexDirection: 'column',
@@ -41,7 +41,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent-mint)', textTransform: 'uppercase', letterSpacing: '1px' }}>
               Surveillance Épidémiologique Nationale RDC
             </span>
-            <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#FFFFFF', marginTop: '4px' }}>
+            <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--hero-fg)', marginTop: '4px' }}>
               {selectedDisease ? selectedDisease.name.fr : 'Maladie à Virus Ebola'}
             </h1>
           </div>
@@ -61,7 +61,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             style={{
               flex: 1,
               backgroundColor: 'var(--accent-mint)',
-              color: '#000',
+              color: 'var(--primary-foreground)',
               border: 'none',
               borderRadius: '10px',
               padding: '12px',
@@ -82,7 +82,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             onClick={() => onNavigate('map')}
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              color: '#FFF',
+              color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
               borderRadius: '10px',
               padding: '12px 16px',
@@ -107,7 +107,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Cas Confirmés</span>
             <TrendingUp size={16} color="var(--accent-mint)" />
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FFF' }}>{epidemicStats?.totalCases ?? 0}</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{epidemicStats?.totalCases ?? 0}</div>
           <span style={{ fontSize: '10px', color: 'var(--accent-mint)' }}>Cumul épidémique</span>
         </div>
 
@@ -142,7 +142,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)', cursor: 'pointer' }}
           >
             <FileText size={24} color="var(--accent-mint)" style={{ marginBottom: '8px' }} />
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>Fiches IDSR</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Fiches IDSR</h3>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Formulaires officiels épidémiologiques OMS/RDC.</p>
           </div>
 
@@ -151,7 +151,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)', cursor: 'pointer' }}
           >
             <Activity size={24} color="var(--accent-mint)" style={{ marginBottom: '8px' }} />
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>Mes Signalements</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Mes Signalements</h3>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Suivi du statut et de la classification des cas.</p>
           </div>
 
@@ -160,7 +160,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)', cursor: 'pointer' }}
           >
             <BookOpen size={24} color="var(--accent-mint)" style={{ marginBottom: '8px' }} />
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>Centre de Connaissances</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Centre de Connaissances</h3>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Guides OMS, protocoles et définitions de cas.</p>
           </div>
 
@@ -169,7 +169,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-color)', cursor: 'pointer' }}
           >
             <Hospital size={24} color="var(--accent-mint)" style={{ marginBottom: '8px' }} />
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>Centres de Santé</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Centres de Santé</h3>
             <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Localisation des centres de traitement (CTE).</p>
           </div>
         </div>
@@ -189,7 +189,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
               style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '14px', border: '1px solid var(--border-color)' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '10px', backgroundColor: 'rgba(20, 184, 166, 0.2)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+                <span style={{ fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
                   {source.sourceType || 'OMS RDC'}
                 </span>
                 <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -197,7 +197,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate }) => {
                   {formatDateTime(source.fetchedAt)}
                 </span>
               </div>
-              <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>{source.title}</h3>
+              <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>{source.title}</h3>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{source.content.substring(0, 120)}...</p>
             </div>
           ))}

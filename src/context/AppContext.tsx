@@ -102,27 +102,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
-  // Set initial theme
+  const applyThemeClass = (next: 'dark' | 'light') => {
+    const root = document.documentElement;
+    root.classList.toggle('dark', next === 'dark');
+    document.body.classList.toggle('dark', next === 'dark');
+    document.body.classList.toggle('light-theme', next === 'light');
+  };
+
+  // Set initial theme — :root = Verdant Sky light, .dark = Verdant Sky dark
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
     const initialTheme = savedTheme || 'dark';
     setTheme(initialTheme);
-    if (initialTheme === 'light') {
-      document.body.classList.add('light-theme');
-    } else {
-      document.body.classList.remove('light-theme');
-    }
+    applyThemeClass(initialTheme);
   }, []);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
     localStorage.setItem('theme', nextTheme);
-    if (nextTheme === 'light') {
-      document.body.classList.add('light-theme');
-    } else {
-      document.body.classList.remove('light-theme');
-    }
+    applyThemeClass(nextTheme);
   };
 
   // Custom setter for User — also updates IndexedDB cache

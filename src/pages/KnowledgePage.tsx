@@ -78,7 +78,7 @@ export const KnowledgePage: React.FC = () => {
     <div style={{ padding: '16px' }}>
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>Centre de Connaissances</h1>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>Centre de Connaissances</h1>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
           Guides OMS • FAQs • Protocoles • Formation sanitaire
         </p>
@@ -95,7 +95,7 @@ export const KnowledgePage: React.FC = () => {
           style={{
             width: '100%', padding: '10px 10px 10px 34px', borderRadius: '10px',
             backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)',
-            color: '#fff', fontSize: '13px', boxSizing: 'border-box' as const
+            color: 'var(--text-primary)', fontSize: '13px', boxSizing: 'border-box' as const
           }}
         />
       </div>
@@ -112,7 +112,7 @@ export const KnowledgePage: React.FC = () => {
               fontSize: '12px',
               fontWeight: activeFilter === d ? 'bold' : 'normal',
               border: `1px solid ${activeFilter === d ? 'var(--accent-mint)' : 'var(--border-color)'}`,
-              backgroundColor: activeFilter === d ? 'rgba(20, 184, 166, 0.2)' : 'var(--bg-card)',
+              backgroundColor: activeFilter === d ? 'var(--primary-alpha-20)' : 'var(--bg-card)',
               color: activeFilter === d ? 'var(--accent-mint)' : 'var(--text-secondary)',
               cursor: 'pointer',
               whiteSpace: 'nowrap' as const
@@ -125,7 +125,7 @@ export const KnowledgePage: React.FC = () => {
 
       {/* WHO featured banner */}
       <div style={{
-        background: 'linear-gradient(135deg, #1e3a5f 0%, #0B4F48 100%)',
+        background: 'var(--hero-gradient)',
         borderRadius: '14px',
         padding: '16px',
         marginBottom: '20px',
@@ -137,7 +137,7 @@ export const KnowledgePage: React.FC = () => {
         <div style={{ fontSize: '36px' }}>🌍</div>
         <div>
           <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#60A5FA', marginBottom: '4px' }}>OMS AFRO • RECOMMANDÉ</div>
-          <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>
             Stratégie Mondiale de Lutte contre les Épidémies 2024–2026
           </h3>
           <a href="https://www.afro.who.int/" target="_blank" rel="noreferrer" style={{ color: '#60A5FA', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -178,7 +178,7 @@ export const KnowledgePage: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <span style={{
                     fontSize: '10px',
-                    backgroundColor: 'rgba(20, 184, 166, 0.2)',
+                    backgroundColor: 'var(--primary-alpha-20)',
                     color: 'var(--accent-mint)',
                     padding: '2px 8px',
                     borderRadius: '4px',
@@ -194,7 +194,7 @@ export const KnowledgePage: React.FC = () => {
                     <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{item.disease}</span>
                   )}
                 </div>
-                <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF', lineHeight: '1.4' }}>{item.title}</h3>
+                <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)', lineHeight: '1.4' }}>{item.title}</h3>
               </div>
               <div style={{ color: 'var(--text-muted)', marginTop: '2px', flexShrink: 0 }}>
                 {expandedId === item.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

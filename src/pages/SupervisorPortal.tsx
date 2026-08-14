@@ -97,7 +97,7 @@ export const SupervisorPortal: React.FC = () => {
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Supervisor Suite v2</span>
         </div>
-        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF' }}>Tableau de Bord & Validation des Équipes</h1>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Tableau de Bord & Validation des Équipes</h1>
       </div>
 
       {/* Tabs */}
@@ -113,8 +113,8 @@ export const SupervisorPortal: React.FC = () => {
             style={{
               flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
               fontSize: '12px', fontWeight: activeTab === tab.key ? 'bold' : 'normal',
-              backgroundColor: activeTab === tab.key ? '#3B82F6' : 'transparent',
-              color: activeTab === tab.key ? '#FFF' : 'var(--text-secondary)', cursor: 'pointer'
+              backgroundColor: activeTab === tab.key ? 'var(--chart-2)' : 'transparent',
+              color: activeTab === tab.key ? 'var(--primary-foreground)' : 'var(--text-secondary)', cursor: 'pointer'
             }}
           >
             {tab.label}
@@ -143,7 +143,7 @@ export const SupervisorPortal: React.FC = () => {
           </div>
 
           <div style={card}>
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF', marginBottom: '10px' }}>📈 Niveaux de Risque par Zone de Santé (IDSR View)</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '10px' }}>📈 Niveaux de Risque par Zone de Santé (IDSR View)</h3>
             {zoneRisks.length === 0 ? (
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px 0' }}>
                 Aucune zone de santé enregistrée.
@@ -152,7 +152,7 @@ export const SupervisorPortal: React.FC = () => {
               zoneRisks.map(z => (
                 <div key={z.zone} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-color)' }}>
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF' }}>{z.zone}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{z.zone}</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{z.cases}</div>
                   </div>
                   <span style={{ fontSize: '12px', fontWeight: 'bold', color: z.risk === 'HIGH' ? '#EF4444' : z.risk === 'MEDIUM' ? '#F59E0B' : '#22C55E' }}>
@@ -186,13 +186,13 @@ export const SupervisorPortal: React.FC = () => {
           ) : (
             approvals.map(app => (
               <div key={app.id} style={card}>
-                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>{app.title}</h3>
+                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>{app.title}</h3>
                 <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px' }}>Soumis par {app.agent} • {app.date}</p>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button style={{ flex: 1, padding: '8px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
+                  <button style={{ flex: 1, padding: '8px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
                     Approuver & Fermer
                   </button>
-                  <button style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', cursor: 'pointer' }}>
+                  <button style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', cursor: 'pointer' }}>
                     Demander Complément
                   </button>
                 </div>

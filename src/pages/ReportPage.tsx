@@ -136,7 +136,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
     padding: '14px',
     borderRadius: '10px',
     backgroundColor: 'var(--accent-mint)',
-    color: '#000',
+    color: 'var(--primary-foreground)',
     fontWeight: 'bold',
     fontSize: '15px',
     border: 'none',
@@ -147,10 +147,10 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
   if (step === 'done') {
     return (
       <div style={{ padding: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-        <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(20, 184, 166, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'var(--primary-alpha-20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <CheckCircle size={40} color="var(--accent-mint)" />
         </div>
-        <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: '#FFF' }}>Signalement Enregistré</h2>
+        <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Signalement Enregistré</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6', maxWidth: '280px' }}>
           {isOnline
             ? 'Votre signalement a été transmis à l\'équipe de surveillance épidémiologique nationale. Un agent prendra contact si nécessaire.'
@@ -177,7 +177,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
           ← Retour
         </button>
         <div>
-          <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: '#FFF' }}>Signaler un Cas Suspect</h1>
+          <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Signaler un Cas Suspect</h1>
           <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Formulaire de signalement IDSR</span>
         </div>
         {!isOnline && (
@@ -198,7 +198,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
       {/* STEP 1: Disease */}
       {step === 'disease' && (
         <div style={card}>
-          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#FFF', marginBottom: '16px' }}>🦠 Sélectionner la Maladie Suspectée</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '16px' }}>🦠 Sélectionner la Maladie Suspectée</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {diseases.map(d => (
               <div
@@ -208,7 +208,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
                   padding: '14px 16px',
                   borderRadius: '10px',
                   border: `2px solid ${diseaseId === d.id ? 'var(--accent-mint)' : 'var(--border-color)'}`,
-                  backgroundColor: diseaseId === d.id ? 'rgba(20, 184, 166, 0.1)' : 'var(--bg-panel)',
+                  backgroundColor: diseaseId === d.id ? 'var(--primary-alpha-10)' : 'var(--bg-panel)',
                   cursor: 'pointer',
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -216,10 +216,10 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 'bold', color: diseaseId === d.id ? 'var(--accent-mint)' : '#FFF', fontSize: '14px' }}>{d.name.fr}</div>
+                  <div style={{ fontWeight: 'bold', color: diseaseId === d.id ? 'var(--accent-mint)' : 'var(--text-primary)', fontSize: '14px' }}>{d.name.fr}</div>
                   {d.caseFatalityRate && <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Létalité : {d.caseFatalityRate}</div>}
                 </div>
-                <span style={{ fontSize: '11px', backgroundColor: 'rgba(20, 184, 166, 0.2)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>{d.code}</span>
+                <span style={{ fontSize: '11px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>{d.code}</span>
               </div>
             ))}
           </div>
@@ -230,7 +230,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
       {/* STEP 2: Patient Info */}
       {step === 'patient' && (
         <div style={card}>
-          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#FFF', marginBottom: '16px' }}>👤 Informations du Patient</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '16px' }}>👤 Informations du Patient</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
               <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>Nom complet *</label>
@@ -273,7 +273,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
       {/* STEP 3: Symptoms */}
       {step === 'symptoms' && (
         <div style={card}>
-          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>🩺 Symptômes Observés</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>🩺 Symptômes Observés</h2>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
             Sélectionnez tous les symptômes présents chez {patientName}
           </p>
@@ -287,7 +287,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
                   borderRadius: '20px',
                   fontSize: '13px',
                   border: `1px solid ${selectedSymptoms.includes(sym) ? 'var(--accent-mint)' : 'var(--border-color)'}`,
-                  backgroundColor: selectedSymptoms.includes(sym) ? 'rgba(20, 184, 166, 0.2)' : 'var(--bg-panel)',
+                  backgroundColor: selectedSymptoms.includes(sym) ? 'var(--primary-alpha-20)' : 'var(--bg-panel)',
                   color: selectedSymptoms.includes(sym) ? 'var(--accent-mint)' : 'var(--text-secondary)',
                   cursor: 'pointer',
                   fontWeight: selectedSymptoms.includes(sym) ? 'bold' : 'normal'
@@ -316,7 +316,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
       {/* STEP 4: Location */}
       {step === 'location' && (
         <div style={card}>
-          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>📍 Localisation du Cas</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>📍 Localisation du Cas</h2>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
             Indiquez où se trouve le patient suspect.
           </p>
@@ -327,7 +327,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
               width: '100%',
               padding: '12px',
               borderRadius: '10px',
-              backgroundColor: coords ? 'rgba(20, 184, 166, 0.1)' : 'var(--bg-panel)',
+              backgroundColor: coords ? 'var(--primary-alpha-10)' : 'var(--bg-panel)',
               border: `1px solid ${coords ? 'var(--accent-mint)' : 'var(--border-color)'}`,
               color: coords ? 'var(--accent-mint)' : 'var(--text-primary)',
               cursor: 'pointer',
@@ -365,7 +365,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
                 width: '100%',
                 padding: '12px',
                 borderRadius: '10px',
-                backgroundColor: hasPhoto ? 'rgba(20, 184, 166, 0.1)' : 'var(--bg-panel)',
+                backgroundColor: hasPhoto ? 'var(--primary-alpha-10)' : 'var(--bg-panel)',
                 border: `1px solid ${hasPhoto ? 'var(--accent-mint)' : 'var(--border-color)'}`,
                 color: hasPhoto ? 'var(--accent-mint)' : 'var(--text-secondary)',
                 cursor: 'pointer',
@@ -391,7 +391,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
       {/* STEP 5: Review */}
       {step === 'review' && (
         <div style={card}>
-          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#FFF', marginBottom: '16px' }}>📋 Révision du Signalement</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '16px' }}>📋 Révision du Signalement</h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
             <div style={{ backgroundColor: 'var(--bg-panel)', borderRadius: '10px', padding: '12px' }}>
@@ -400,7 +400,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
             </div>
             <div style={{ backgroundColor: 'var(--bg-panel)', borderRadius: '10px', padding: '12px' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Patient</div>
-              <div style={{ fontWeight: 'bold', color: '#FFF' }}>{patientName}</div>
+              <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{patientName}</div>
               {patientPhone && <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{patientPhone}</div>}
             </div>
             <div style={{ backgroundColor: 'var(--bg-panel)', borderRadius: '10px', padding: '12px' }}>
@@ -413,7 +413,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
             </div>
             <div style={{ backgroundColor: 'var(--bg-panel)', borderRadius: '10px', padding: '12px' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Localisation</div>
-              <div style={{ fontWeight: 'bold', color: '#FFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <MapPin size={14} color="var(--accent-mint)" />{location}
               </div>
             </div>

@@ -111,7 +111,7 @@ export const LaboratoryPortal: React.FC = () => {
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Lab Suite v2</span>
         </div>
-        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF' }}>Gestion des Échantillons & Résultats PCR</h1>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Gestion des Échantillons & Résultats PCR</h1>
       </div>
 
       {/* Tabs */}
@@ -127,8 +127,8 @@ export const LaboratoryPortal: React.FC = () => {
             style={{
               flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
               fontSize: '12px', fontWeight: activeTab === tab.key ? 'bold' : 'normal',
-              backgroundColor: activeTab === tab.key ? '#8B5CF6' : 'transparent',
-              color: activeTab === tab.key ? '#FFF' : 'var(--text-secondary)', cursor: 'pointer'
+              backgroundColor: activeTab === tab.key ? 'var(--chart-4)' : 'transparent',
+              color: activeTab === tab.key ? 'var(--primary-foreground)' : 'var(--text-secondary)', cursor: 'pointer'
             }}
           >
             {tab.label}
@@ -167,7 +167,7 @@ export const LaboratoryPortal: React.FC = () => {
                 </span>
               </div>
 
-              <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>{sample.patient_name}</h3>
+              <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>{sample.patient_name}</h3>
               <p style={{ fontSize: '12px', color: 'var(--accent-mint)', fontWeight: 'bold', marginBottom: '2px' }}>🦠 Pathogène recherché : {sample.disease_suspected}</p>
               <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>🧪 Nature : {sample.type} • Prélevé le {sample.collected_at}</p>
 

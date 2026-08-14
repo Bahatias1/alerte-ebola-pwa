@@ -57,7 +57,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onFinished }) => {
                     style={{
                       ...styles.langBtn,
                       backgroundColor: lang === item.code ? 'var(--accent-mint)' : 'var(--bg-card)',
-                      color: lang === item.code ? '#000' : 'var(--text-primary)',
+                      color: lang === item.code ? 'var(--primary-foreground)' : 'var(--text-primary)',
                       border: `1px solid ${lang === item.code ? 'var(--accent-mint)' : 'var(--border-color)'}`
                     }}
                   >

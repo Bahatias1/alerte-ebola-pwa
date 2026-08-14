@@ -18,7 +18,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
   const getRoleBadge = (r: UserRole) => {
     switch (r) {
       case 'SUPER_ADMIN': return { label: 'SUPER ADMIN', color: '#EC4899', bg: 'rgba(236, 72, 153, 0.15)' };
-      case 'ADMIN': case 'ADMIN_SANTE': return { label: 'ADMINISTRATEUR', color: '#14B8A6', bg: 'rgba(20, 184, 166, 0.15)' };
+      case 'ADMIN': case 'ADMIN_SANTE': return { label: 'ADMINISTRATEUR', color: 'var(--primary)', bg: 'var(--primary-alpha-15)' };
       case 'SUPERVISOR': return { label: 'SUPERVISEUR RÉGIONAL', color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.15)' };
       case 'LABORATORY': return { label: 'LABORATOIRE / INRB', color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.15)' };
       case 'HEALTH_AGENT': return { label: 'AGENT DE SANTÉ', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)' };
@@ -33,10 +33,10 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
       
       {/* 1. Portal Header Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, #0B4F48 0%, #063A35 100%)',
+        background: 'var(--hero-gradient)',
         borderRadius: '16px',
         padding: '20px',
-        border: '1px solid rgba(20, 184, 166, 0.3)',
+        border: '1px solid var(--primary-alpha-30)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -49,7 +49,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
                 {selectedDisease ? selectedDisease.name.fr : 'Alert Disease Portal'}
               </span>
             </div>
-            <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#FFF' }}>
+            <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)' }}>
               {user ? `Bonjour, ${user.name}` : 'Portail National Sanitaire — Alert Disease'}
             </h1>
           </div>
@@ -64,7 +64,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
           {(role === 'PUBLIC_USER' || role === 'USER') && (
             <button
               onClick={() => onNavigate('report')}
-              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
               <PlusCircle size={16} /> Signaler un cas
             </button>
@@ -73,7 +73,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
           {(role === 'HEALTH_AGENT' || role === 'ADMIN' || role === 'SUPERVISOR') && (
             <button
               onClick={() => onNavigate('agent_portal')}
-              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
               <Activity size={16} /> Espace Enquêtes Terrain
             </button>
@@ -82,7 +82,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
           {(role === 'LABORATORY' || role === 'ADMIN') && (
             <button
               onClick={() => onNavigate('lab_portal')}
-              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: '#8B5CF6', color: '#FFF', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: '#8B5CF6', color: 'var(--text-primary)', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
               <TestTube size={16} /> Espace Laboratoire INRB
             </button>
@@ -91,7 +91,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
           {(role === 'SUPERVISOR' || role === 'ADMIN') && (
             <button
               onClick={() => onNavigate('supervisor_portal')}
-              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: '#3B82F6', color: '#FFF', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: '#3B82F6', color: 'var(--text-primary)', border: 'none', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
               <Users size={16} /> Dashboard Régional
             </button>
@@ -100,7 +100,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
           {(role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'ADMIN_SANTE') && (
             <button
               onClick={() => onNavigate('admin_portal')}
-              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#FFF', border: '1px solid var(--accent-mint)', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              style={{ padding: '10px 18px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', border: '1px solid var(--accent-mint)', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
               <Settings size={16} /> Administration Système
             </button>
@@ -115,7 +115,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Cas Cumulés</span>
             <TrendingUp size={16} color="var(--accent-mint)" />
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FFF' }}>{epidemicStats?.totalCases ?? '142'}</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{epidemicStats?.totalCases ?? '142'}</div>
           <span style={{ fontSize: '10px', color: 'var(--accent-mint)' }}>RDC Global</span>
         </div>
 
@@ -133,7 +133,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Signalements Citoyens</span>
             <FileText size={16} color="var(--accent-mint)" />
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FFF' }}>{myReports.length}</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{myReports.length}</div>
           <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Dans la base</span>
         </div>
       </div>
@@ -141,15 +141,15 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
       {/* 3. Role-Specific Dedicated Widgets */}
       {role === 'PUBLIC_USER' && (
         <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--border-color)' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: 'bold', color: '#FFF', marginBottom: '12px' }}>💡 Mon Espace Citoyen</h2>
+          <h2 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '12px' }}>💡 Mon Espace Citoyen</h2>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
             Accédez à vos signalements sanitaires, aux fiches d'information OMS et aux numéros d'urgence de la RDC.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <button onClick={() => onNavigate('my_reports')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button onClick={() => onNavigate('my_reports')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={16} color="var(--accent-mint)" /> Mes Signalements
             </button>
-            <button onClick={() => onNavigate('forms')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button onClick={() => onNavigate('forms')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileText size={16} color="var(--accent-mint)" /> Fiches IDSR
             </button>
           </div>
@@ -170,10 +170,10 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
             Gestion des enquêtes épidémiologiques attribuées, suivi des contacts et demandes de prélèvements.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
-            <button onClick={() => onNavigate('agent_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => onNavigate('agent_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
               📋 Enquêtes Attribuées (3)
             </button>
-            <button onClick={() => onNavigate('agent_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => onNavigate('agent_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
               👥 Suivi des Contacts (18)
             </button>
           </div>
@@ -194,10 +194,10 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
             Réception des échantillons sanguins/écouvillons, saisie des résultats PCR/Culture et validation.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
-            <button onClick={() => onNavigate('lab_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => onNavigate('lab_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
               🧪 Échantillons en Attente (5)
             </button>
-            <button onClick={() => onNavigate('lab_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => onNavigate('lab_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
               ✅ Saisie Résultats PCR
             </button>
           </div>
@@ -210,7 +210,7 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
             <h2 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--accent-mint)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <ShieldAlert size={18} /> Console Administration NIDSP
             </h2>
-            <span style={{ fontSize: '10px', backgroundColor: 'rgba(20, 184, 166, 0.2)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
               ENTERPRISE ADMIN
             </span>
           </div>
@@ -218,10 +218,10 @@ export const RoleBasedDashboard: React.FC<RoleDashboardProps> = ({ onNavigate })
             Gestion des utilisateurs RBAC, catalogue des pathogènes, moteur de règles et journaux d'audit Supabase.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
-            <button onClick={() => onNavigate('admin_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => onNavigate('admin_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
               👥 Gestion Utilisateurs RBAC
             </button>
-            <button onClick={() => onNavigate('admin_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => onNavigate('admin_portal')} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
               🛡️ Catalogue des Pathogènes
             </button>
           </div>

@@ -117,7 +117,7 @@ export const HealthAgentPortal: React.FC = () => {
           </span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>IDSR Field Suite v2</span>
         </div>
-        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF' }}>Enquêtes Terrain & Suivi des Contacts</h1>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Enquêtes Terrain & Suivi des Contacts</h1>
       </div>
 
       {/* Navigation Tabs */}
@@ -134,7 +134,7 @@ export const HealthAgentPortal: React.FC = () => {
               flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
               fontSize: '12px', fontWeight: activeTab === tab.key ? 'bold' : 'normal',
               backgroundColor: activeTab === tab.key ? 'var(--accent-mint)' : 'transparent',
-              color: activeTab === tab.key ? '#000' : 'var(--text-secondary)', cursor: 'pointer'
+              color: activeTab === tab.key ? 'var(--primary-foreground)' : 'var(--text-secondary)', cursor: 'pointer'
             }}
           >
             {tab.label}
@@ -155,21 +155,21 @@ export const HealthAgentPortal: React.FC = () => {
             investigations.map(inv => (
               <div key={inv.id} style={card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent-mint)', backgroundColor: 'rgba(20, 184, 166, 0.2)', padding: '2px 8px', borderRadius: '4px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent-mint)', backgroundColor: 'var(--primary-alpha-20)', padding: '2px 8px', borderRadius: '4px' }}>
                     {inv.case_number}
                   </span>
                   <span style={{ fontSize: '10px', color: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.2)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
                     {inv.status}
                   </span>
                 </div>
-                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>{inv.patient_name}</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>{inv.patient_name}</h3>
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>📍 Zone : {inv.health_zone}</p>
                 
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: '#000', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
+                  <button style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--accent-mint)', color: 'var(--primary-foreground)', border: 'none', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
                     Ouvrir l'Investigation
                   </button>
-                  <button style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: '#FFF', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <button style={{ padding: '8px 12px', borderRadius: '8px', backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <TestTube size={14} /> Demander Prélèvement
                   </button>
                 </div>
@@ -192,7 +192,7 @@ export const HealthAgentPortal: React.FC = () => {
             contacts.map(c => (
               <div key={c.id} style={card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF' }}>{c.contact_name}</h3>
+                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{c.contact_name}</h3>
                   <span style={{ fontSize: '11px', color: 'var(--accent-mint)', fontWeight: 'bold' }}>Jour {c.followup_day} / 21</span>
                 </div>
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>📞 {c.phone}</p>
@@ -218,7 +218,7 @@ export const HealthAgentPortal: React.FC = () => {
           ) : (
             facilities.map(f => (
               <div key={f.id} style={card}>
-                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF', marginBottom: '4px' }}>{f.name}</h3>
+                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>{f.name}</h3>
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>📍 {f.region}</p>
                 <p style={{ fontSize: '11px', color: 'var(--accent-mint)', fontWeight: 'bold', marginBottom: '2px' }}>🛏️ {f.beds}</p>
                 <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Contact : {f.doctor}</p>

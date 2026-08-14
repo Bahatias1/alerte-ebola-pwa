@@ -436,14 +436,14 @@ export const MapPage: React.FC = () => {
   return (
     <div style={{ width: '100%', height: 'calc(100vh - 120px)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
       {/* Map Container */}
-      <div ref={mapContainerRef} style={{ width: '100%', height: '100%', backgroundColor: '#0B0F17' }} />
+      <div ref={mapContainerRef} style={{ width: '100%', height: '100%', backgroundColor: 'var(--background)' }} />
 
       {/* Top Header Banner & Layer Toggle Trigger */}
       <div style={{ position: 'absolute', top: '70px', left: '16px', right: '16px', zIndex: 1000, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', pointerEvents: 'none' }}>
-        <div style={{ pointerEvents: 'auto', backgroundColor: 'rgba(11, 15, 23, 0.9)', backdropFilter: 'blur(12px)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ pointerEvents: 'auto', backgroundColor: 'var(--map-overlay)', backdropFilter: 'blur(12px)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Layers size={18} color="var(--accent-mint)" />
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#FFF' }}>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
               Carte Surveillance GIS — {selectedDisease?.code || 'MVE'}
             </div>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
@@ -457,8 +457,8 @@ export const MapPage: React.FC = () => {
           onClick={() => setShowLayerPanel(prev => !prev)}
           style={{
             pointerEvents: 'auto',
-            backgroundColor: showLayerPanel ? 'var(--accent-mint)' : 'rgba(11, 15, 23, 0.9)',
-            color: showLayerPanel ? '#000' : '#FFF',
+            backgroundColor: showLayerPanel ? 'var(--accent-mint)' : 'var(--map-overlay)',
+            color: showLayerPanel ? 'var(--primary-foreground)' : 'var(--text-primary)',
             border: '1px solid var(--border-color)',
             borderRadius: '12px',
             padding: '10px 14px',
@@ -483,7 +483,7 @@ export const MapPage: React.FC = () => {
           top: '124px',
           right: '16px',
           zIndex: 1001,
-          backgroundColor: 'rgba(11, 15, 23, 0.95)',
+          backgroundColor: 'var(--map-overlay)',
           backdropFilter: 'blur(16px)',
           border: '1px solid var(--border-color)',
           borderRadius: '14px',
@@ -495,41 +495,41 @@ export const MapPage: React.FC = () => {
           gap: '10px'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#FFF' }}>Contrôle des Couches</span>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Contrôle des Couches</span>
             <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{selectedDisease?.code}</span>
           </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#FFF', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={showProvinces} onChange={e => setShowProvinces(e.target.checked)} />
             Limites des Provinces
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#FFF', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={showHealthZones} onChange={e => setShowHealthZones(e.target.checked)} />
             Zones de Santé
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#FFF', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={showHealthAreas} onChange={e => setShowHealthAreas(e.target.checked)} />
             Aires de Santé
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#FFF', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={showFacilities} onChange={e => setShowFacilities(e.target.checked)} />
             Structures CTE / Santé
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#FFF', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={showConfirmed} onChange={e => setShowConfirmed(e.target.checked)} />
             Cas Confirmés 🔴
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#FFF', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={showSuspected} onChange={e => setShowSuspected(e.target.checked)} />
             Cas Suspects 🟡
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#FFF', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
             <input type="checkbox" checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} />
             Carte de Chaleur (Heatmap)
           </label>
@@ -542,13 +542,13 @@ export const MapPage: React.FC = () => {
         bottom: '180px',
         right: '16px',
         zIndex: 10,
-        backgroundColor: 'rgba(11, 15, 23, 0.88)',
+        backgroundColor: 'var(--map-overlay)',
         backdropFilter: 'blur(12px)',
         border: '1px solid var(--border-color)',
         borderRadius: '10px',
         padding: '10px 12px',
         fontSize: '11px',
-        color: '#FFF',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         gap: '6px'
@@ -561,13 +561,13 @@ export const MapPage: React.FC = () => {
       </div>
 
       {/* Floating Province Stats Drawer Panel */}
-      <div style={{ position: 'absolute', bottom: '24px', left: '16px', right: '16px', zIndex: 10, backgroundColor: 'rgba(11, 15, 23, 0.92)', backdropFilter: 'blur(16px)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+      <div style={{ position: 'absolute', bottom: '24px', left: '16px', right: '16px', zIndex: 10, backgroundColor: 'var(--map-overlay)', backdropFilter: 'blur(16px)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <MapPin size={16} color="var(--accent-mint)" />
-            <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#FFF', margin: 0 }}>{selectedProvince}</h3>
+            <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{selectedProvince}</h3>
           </div>
-          <span style={{ fontSize: '10px', backgroundColor: 'rgba(20,184,166,0.2)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+          <span style={{ fontSize: '10px', backgroundColor: 'var(--primary-alpha-20)', color: 'var(--accent-mint)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
             {selectedDisease?.code}
           </span>
         </div>

@@ -28,7 +28,7 @@ export const NotificationsPage: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#FFF', marginBottom: '2px' }}>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '2px' }}>
             Alertes & Notifications
           </h1>
           {unreadCount > 0 && (
@@ -68,8 +68,8 @@ export const NotificationsPage: React.FC = () => {
         gap: '8px',
         fontSize: '11px',
         color: 'var(--accent-mint)',
-        backgroundColor: 'rgba(20, 184, 166, 0.1)',
-        border: '1px solid rgba(20, 184, 166, 0.3)',
+        backgroundColor: 'var(--primary-alpha-10)',
+        border: '1px solid var(--primary-alpha-30)',
         borderRadius: '8px',
         padding: '8px 14px',
         marginBottom: '20px'
@@ -136,7 +136,7 @@ export const NotificationsPage: React.FC = () => {
                   {alert.region && <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>• 📍 {alert.region}</span>}
                 </div>
 
-                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#FFF', marginBottom: '6px' }}>{alert.title}</h3>
+                <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '6px' }}>{alert.title}</h3>
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '10px' }}>{alert.description}</p>
 
                 {!alert.isRead && (
