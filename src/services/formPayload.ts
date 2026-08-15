@@ -195,7 +195,6 @@ export function buildFormSubmissionPayload(input: {
     form_template_id: input.templateId,
     entity_type: 'INVESTIGATION',
     entity_id: newClientId(),
-    disease_id: input.diseaseId || null,
     submitted_by: submittedBy,
     form_data: {
       ...input.formData,
@@ -225,20 +224,52 @@ export function buildReportedCasePayload(input: {
   userId?: string | null;
   latitude?: number;
   longitude?: number;
+  provinceName?: string;
+  healthZoneName?: string;
+  healthAreaName?: string;
+  village?: string;
 }): Record<string, unknown> {
+  // Always ensure location is non-null (DB NOT NULL constraint)
+  const locationParts = [
+    input.provinceName,
+    input.healthZoneName,
+    input.healthAreaName,
+    input.village,
+  ].filter(Boolean);
+  const resolvedLocation = input.location
+    || (locationParts.length > 0 ? locationParts.join(' / ') : 'Localisation non renseignée');
+
+  const locationSource = (input.latitude != null && input.longitude != null)
+    ? 'GPS'
+    : input.provinceName
+      ? 'MANUAL'
+      : 'UNKNOWN';
+
   const payload: Record<string, unknown> = {
     id: input.clientSubmissionId,
     full_name: input.fullName,
     phone: input.phone,
     symptoms: input.symptoms,
     description: input.description,
-    status: 'Suspect',
-    disease_id: input.diseaseId || null,
+    // DB CHECK constraint: status IN ('nouveau', 'en_cours', 'validé', 'rejeté', 'Suspect', 'Confirmed')
+    status: 'nouveau',
+    // DB column is suspected_disease_id, NOT disease_id
+    suspected_disease_id: input.diseaseId || null,
+    location_source: locationSource,
+    // location column is NOT NULL in the DB
+    location: resolvedLocation,
   };
-  if (input.location) payload.location = input.location;
+
+  if (input.provinceName)    payload.province_name    = input.provinceName;
+  if (input.healthZoneName)  payload.health_zone_name = input.healthZoneName;
+  if (input.healthAreaName)  payload.health_area_name = input.healthAreaName;
+  if (input.village)         payload.village          = input.village;
+  // Note: location is already set above — do NOT double-set it
   if (isAuthUserId(input.userId)) payload.user_id = input.userId;
   if (input.latitude != null && input.longitude != null) {
-    payload.geom = `POINT(${input.longitude} ${input.latitude})`;
+    payload.latitude  = input.latitude;
+    payload.longitude = input.longitude;
+    payload.geom      = `POINT(${input.longitude} ${input.latitude})`;
   }
   return payload;
 }
