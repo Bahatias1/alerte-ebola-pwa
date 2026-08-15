@@ -5,13 +5,20 @@ import { Activity, Clock, CheckCircle, XCircle, AlertTriangle, Loader, RefreshCw
 import type { ReportedCase } from '../types';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  'nouveau': { label: 'Signalement Reçu — En attente', color: '#F59E0B', icon: <Clock size={14} /> },
+  'validé': { label: 'Validé — Cas Pris en Charge', color: '#10B981', icon: <CheckCircle size={14} /> },
+  'rejeté': { label: 'Invalidé / Fausse Alerte', color: '#6B7280', icon: <XCircle size={14} /> },
+  'Guéri': { label: 'État de sortie : Guéri (Rétabli)', color: '#10B981', icon: <CheckCircle size={14} /> },
+  'Décédé': { label: 'État de sortie : Décédé', color: '#EF4444', icon: <XCircle size={14} /> },
+  'Transféré': { label: 'État de sortie : Transféré', color: '#3B82F6', icon: <Activity size={14} /> },
   'Suspect': { label: 'Suspect — En attente', color: '#F59E0B', icon: <AlertTriangle size={14} /> },
   'under_review': { label: 'En cours d\'investigation', color: '#3B82F6', icon: <Activity size={14} /> },
-  'validated': { label: 'Validé — Cas Confirmé', color: '#EF4444', icon: <CheckCircle size={14} /> },
+  'validated': { label: 'Validé — Cas Confirmé', color: '#10B981', icon: <CheckCircle size={14} /> },
   'Confirmé': { label: 'Confirmé', color: '#EF4444', icon: <CheckCircle size={14} /> },
   'rejected': { label: 'Invalidé', color: '#6B7280', icon: <XCircle size={14} /> },
   'Invalidé': { label: 'Invalidé', color: '#6B7280', icon: <XCircle size={14} /> },
-  'closed': { label: 'Dossier Fermé', color: 'var(--primary)', icon: <CheckCircle size={14} /> },
+  'closed': { label: 'Dossier Fermé', color: 'var(--accent-mint)', icon: <CheckCircle size={14} /> },
+  'CLOSED': { label: 'Dossier Clôturé', color: 'var(--accent-mint)', icon: <CheckCircle size={14} /> },
 };
 
 const formatDate = (dateStr?: string) => {
