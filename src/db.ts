@@ -47,6 +47,11 @@ export class AlertEbolaDatabase extends Dexie {
     this.version(2).stores({
       formOutbox: 'id, status, targetTable, createdAt'
     });
+
+    // v3: add 'name' index to healthCenters so orderBy('name') works
+    this.version(3).stores({
+      healthCenters: 'id, name, province, verified'
+    });
   }
 }
 
