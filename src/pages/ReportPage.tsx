@@ -5,6 +5,7 @@ import type { ReportedCase } from '../types';
 import { newClientId } from '../lib/ids';
 import { buildReportedCasePayload } from '../services/formPayload';
 import { enqueueAndSync } from '../services/outboxSync';
+import { GeoSelector, type GeoSelection } from '../components/GeoSelector';
 import {
   PlusCircle, MapPin, Camera, AlertTriangle, CheckCircle,
   Loader, WifiOff
@@ -39,6 +40,8 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState('');
   const [hasPhoto, setHasPhoto] = useState(false);
+  // Cascading geographic selection backed by real Supabase PostGIS tables
+  const [geoSel, setGeoSel] = useState<Partial<GeoSelection>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
   const selectedDiseaseObj = diseases.find(d => d.id === diseaseId);
@@ -83,17 +86,32 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
     };
 
     try {
+      // Build a human-readable location string for the text field
+      const locationParts = [
+        geoSel.provinceName,
+        geoSel.healthZoneName,
+        geoSel.healthAreaName,
+        geoSel.village,
+      ].filter(Boolean);
+      const locationStr = locationParts.length > 0
+        ? locationParts.join(' / ')
+        : location;
+
       const payload = buildReportedCasePayload({
         clientSubmissionId: clientId,
         fullName: patientName,
         phone: patientPhone,
         symptoms: selectedSymptoms.join(', '),
         description,
-        location,
+        location: locationStr,
         diseaseId: diseaseId || null,
         userId: user?.id,
         latitude: coords?.lat,
         longitude: coords?.lon,
+        provinceName:   geoSel.provinceName,
+        healthZoneName: geoSel.healthZoneName,
+        healthAreaName: geoSel.healthAreaName,
+        village:        geoSel.village,
       });
       const result = await enqueueAndSync('reported_cases', payload, clientId);
       if (!result.synced && !result.offline) {
@@ -309,13 +327,27 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
         </div>
       )}
 
-      {/* STEP 4: Location */}
+      {/* STEP 4: Location — cascading PostGIS referential */}
       {step === 'location' && (
         <div style={card}>
           <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>📍 Localisation du Cas</h2>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-            Indiquez où se trouve le patient suspect.
+            Sélectionnez la province, la zone de santé et l'aire de santé du patient suspect.
           </p>
+
+          {/* Cascading geographic selector */}
+          <GeoSelector
+            value={geoSel}
+            onChange={sel => {
+              setGeoSel(sel);
+              // Auto-build location string for backward compatibility
+              const parts = [sel.provinceName, sel.healthZoneName, sel.healthAreaName, sel.village].filter(Boolean);
+              if (parts.length > 0) setLocation(parts.join(' / '));
+            }}
+            showVillage
+          />
+
+          {/* GPS detection */}
           <button
             onClick={detectLocation}
             disabled={geoLoading}
@@ -331,25 +363,14 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              marginBottom: '12px',
+              marginTop: '12px',
               fontWeight: 'bold'
             }}
           >
             {geoLoading ? <Loader size={16} className="spin" /> : <MapPin size={16} />}
-            {geoLoading ? 'Localisation en cours...' : coords ? '✓ Position GPS capturée' : 'Détecter ma position GPS'}
+            {geoLoading ? 'Localisation en cours...' : coords ? '✓ Position GPS capturée' : 'Détecter ma position GPS (optionnel)'}
           </button>
-          {geoError && <p style={{ color: 'var(--warning)', fontSize: '12px', marginBottom: '10px' }}>{geoError}</p>}
-
-          <div>
-            <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>Localisation manuelle (Province / Zone de Santé / Village)</label>
-            <input
-              type="text"
-              placeholder="Ex: Équateur / Zone de Santé Bikoro / Village Isange"
-              value={location}
-              onChange={e => setLocation(e.target.value)}
-              style={input}
-            />
-          </div>
+          {geoError && <p style={{ color: 'var(--warning)', fontSize: '12px', marginTop: '8px' }}>{geoError}</p>}
 
           {/* Photo capture */}
           <div style={{ marginTop: '12px' }}>
@@ -379,7 +400,11 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
             <button onClick={() => setStep('symptoms')} style={{ ...btnPrimary, backgroundColor: 'var(--bg-panel)', color: 'var(--text-primary)', marginTop: 0, flex: 1 }}>← Retour</button>
-            <button onClick={() => setStep('review')} disabled={!location} style={{ ...btnPrimary, marginTop: 0, flex: 2, opacity: location ? 1 : 0.5 }}>Réviser →</button>
+            <button
+              onClick={() => setStep('review')}
+              disabled={!geoSel.provinceId && !location}
+              style={{ ...btnPrimary, marginTop: 0, flex: 2, opacity: (geoSel.provinceId || location) ? 1 : 0.5 }}
+            >Réviser →</button>
           </div>
         </div>
       )}
@@ -408,10 +433,26 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onBack }) => {
               </div>
             </div>
             <div style={{ backgroundColor: 'var(--bg-panel)', borderRadius: '10px', padding: '12px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Localisation</div>
-              <div style={{ fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <MapPin size={14} color="var(--accent-mint)" />{location}
-              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px' }}>Localisation</div>
+              {geoSel.provinceName && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '12px' }}>
+                  <div style={{ color: 'var(--text-secondary)' }}>Province:</div>
+                  <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{geoSel.provinceName}</div>
+                  {geoSel.healthZoneName && <><div style={{ color: 'var(--text-secondary)' }}>Zone de Santé:</div><div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{geoSel.healthZoneName}</div></>}
+                  {geoSel.healthAreaName && <><div style={{ color: 'var(--text-secondary)' }}>Aire de Santé:</div><div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{geoSel.healthAreaName}</div></>}
+                  {geoSel.village && <><div style={{ color: 'var(--text-secondary)' }}>Village:</div><div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{geoSel.village}</div></>}
+                </div>
+              )}
+              {!geoSel.provinceName && (
+                <div style={{ fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <MapPin size={14} color="var(--accent-mint)" />{location || 'Non renseignée'}
+                </div>
+              )}
+              {coords && (
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  📡 GPS: {coords.lat.toFixed(5)}, {coords.lon.toFixed(5)}
+                </div>
+              )}
             </div>
           </div>
 
