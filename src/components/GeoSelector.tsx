@@ -81,6 +81,11 @@ export const GeoSelector: React.FC<GeoSelectorProps> = ({
 
   // Load health zones when province changes
   const loadZones = useCallback(async (provinceId: string) => {
+    if (!provinceId) {
+      setZones([]);
+      setAreas([]);
+      return;
+    }
     setLoadingZones(true);
     setZones([]);
     setAreas([]);
@@ -95,6 +100,10 @@ export const GeoSelector: React.FC<GeoSelectorProps> = ({
 
   // Load health areas when zone changes
   const loadAreas = useCallback(async (healthZoneId: string) => {
+    if (!healthZoneId) {
+      setAreas([]);
+      return;
+    }
     setLoadingAreas(true);
     setAreas([]);
     const { data } = await supabase
@@ -105,6 +114,24 @@ export const GeoSelector: React.FC<GeoSelectorProps> = ({
     setAreas((data || []).map((r: any) => ({ id: r.id, name: r.name })));
     setLoadingAreas(false);
   }, []);
+
+  const prevProvIdRef = useRef<string | undefined>();
+  const prevZoneIdRef = useRef<string | undefined>();
+
+  // React to prop changes only when IDs actually change
+  useEffect(() => {
+    if (value.provinceId && value.provinceId !== prevProvIdRef.current) {
+      prevProvIdRef.current = value.provinceId;
+      loadZones(value.provinceId);
+    }
+  }, [value.provinceId, loadZones]);
+
+  useEffect(() => {
+    if (value.healthZoneId && value.healthZoneId !== prevZoneIdRef.current) {
+      prevZoneIdRef.current = value.healthZoneId;
+      loadAreas(value.healthZoneId);
+    }
+  }, [value.healthZoneId, loadAreas]);
 
   const handleProvince = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const opt = provinces.find(p => p.id === e.target.value);
