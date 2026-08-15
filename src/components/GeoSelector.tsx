@@ -5,7 +5,7 @@
  * Uses the same tables as admin/src/services/geographyService.ts:
  *   provinces, health_zones (province_id FK), health_areas (health_zone_id FK)
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 
 export interface GeoSelection {
@@ -115,8 +115,8 @@ export const GeoSelector: React.FC<GeoSelectorProps> = ({
     setLoadingAreas(false);
   }, []);
 
-  const prevProvIdRef = useRef<string | undefined>();
-  const prevZoneIdRef = useRef<string | undefined>();
+  const prevProvIdRef = useRef<string | undefined>(undefined);
+  const prevZoneIdRef = useRef<string | undefined>(undefined);
 
   // React to prop changes only when IDs actually change
   useEffect(() => {
