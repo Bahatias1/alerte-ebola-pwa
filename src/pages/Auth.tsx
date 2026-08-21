@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { useApp } from '../context/AppContext';
-import { db } from '../db';
 import { HeartPulse, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import type { UserProfile } from '../types';
 
@@ -28,96 +27,56 @@ export const Auth: React.FC<AuthProps> = ({ onNavigate }) => {
     setErrorMsg('');
 
     try {
-      // 1. Temporary Backdoor for Review / Offline Testing
-      if ((email === 'admin@ebolalert.cd' || email === 'admin@test.com') && password === 'admin') {
-        const adminProfile: UserProfile = {
-          id: 'admin-uuid-offline',
-          name: 'Admin',
-          postnom: 'Sanitaire',
-          email,
-          role: 'SUPER_ADMIN',
-          selectedLanguage: 'fr',
+      // 1. Production Login with Supabase (Strictly requires online connectivity)
+      if (!isOnline) {
+        throw new Error(
+          lang === 'en'
+            ? 'Offline login unavailable. An active internet connection is required to authenticate.'
+            : 'Connexion impossible hors-ligne. Une connexion Internet active est requise pour vous authentifier.'
+        );
+      }
+
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (authError) throw authError;
+
+      if (authData?.user) {
+        // Fetch authoritative profile data from the public.users table
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select()
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        if (userError) {
+          console.warn('Could not fetch user profile from public.users:', userError);
+        }
+
+        const profile: UserProfile = {
+          id: authData.user.id,
+          name: userData?.name || 'Utilisateur',
+          postnom: userData?.post_nom || '',
+          email: authData.user.email || email,
+          role: userData?.role || 'CITIZEN',
+          selectedLanguage: userData?.selectedLanguage || 'fr',
           locationConsent: true,
           notificationsConsent: true,
-          currentRegion: 'Kinshasa',
-          isPremium: true,
+          currentRegion: userData?.location || 'Localisation...',
+          isPremium: userData?.role === 'SUPER_ADMIN',
           joinedTimestamp: Date.now(),
           lastSyncTimestamp: Date.now()
         };
-        await setUser(adminProfile);
-        setIsLoading(false);
+        
+        await setUser(profile);
         onNavigate('home');
-        return;
       }
-      if (email === 'test@test.com' && password === 'test') {
-        const userProfile: UserProfile = {
-          id: 'test-uuid-offline',
-          name: 'Testeur',
-          postnom: 'EbolAlert',
-          email,
-          role: 'USER',
-          selectedLanguage: 'fr',
-          locationConsent: true,
-          notificationsConsent: true,
-          currentRegion: 'Nord-Kivu',
-          isPremium: false,
-          joinedTimestamp: Date.now(),
-          lastSyncTimestamp: Date.now()
-        };
-        await setUser(userProfile);
-        setIsLoading(false);
-        onNavigate('home');
-        return;
-      }
-
-      // 2. Normal Login with Supabase
-      if (isOnline) {
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (authError) throw authError;
-
-        if (authData?.user) {
-          // Fetch additional profile data from the public.users table
-          const { data: userData } = await supabase
-            .from('users')
-            .select()
-            .eq('id', authData.user.id)
-            .maybeSingle();
-
-          const profile: UserProfile = {
-            id: authData.user.id,
-            name: userData?.name || 'Utilisateur',
-            postnom: userData?.post_nom || '',
-            email: authData.user.email || email,
-            role: userData?.role || 'USER',
-            selectedLanguage: userData?.selectedLanguage || 'fr',
-            locationConsent: true,
-            notificationsConsent: true,
-            currentRegion: userData?.location || 'Localisation...',
-            isPremium: userData?.role === 'SUPER_ADMIN', // Arbitrary match
-            joinedTimestamp: Date.now(),
-            lastSyncTimestamp: Date.now()
-          };
-          
-          await setUser(profile);
-          onNavigate('home');
-        }
-      } else {
-        // Offline Fallback - check in IndexedDB local profile cache
-        const cached = await db.userProfiles.toCollection().first();
-        if (cached && cached.email === email) {
-          await setUser(cached);
-          onNavigate('home');
-        } else {
-          throw new Error(lang === 'en' ? 'Offline: User credentials not found in local cache' : 'Hors-ligne : Identifiants introuvables localement');
-        }
-      }
-    } catch (e: any) {
-      console.error(e);
-      setErrorMsg(e.message || (lang === 'en' ? 'Invalid email or password' : 'Email ou mot de passe incorrect'));
+    } catch (e: unknown) {
+      console.error('Authentication failure:', e);
+      const msg = e instanceof Error ? e.message : (lang === 'en' ? 'Invalid email or password' : 'Email ou mot de passe incorrect');
+      setErrorMsg(msg);
     } finally {
       setIsLoading(false);
     }
