@@ -6,7 +6,7 @@ import { RefreshCw, MapPin, Layers, Filter } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-export type RiskLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH';
+export type RiskLevel = 'NOT_ASSESSED' | 'DATA_UNAVAILABLE' | 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH';
 
 export interface ProvinceRiskData {
   province: string;
@@ -19,6 +19,42 @@ export interface ProvinceRiskData {
   lastUpdate: string;
 }
 
+interface ProvinceStatsPayload {
+  new_cases?: number;
+  confirmed_cases?: number;
+  new_deaths?: number;
+  total_deaths?: number;
+  source?: string;
+  summary?: string;
+}
+
+const PROVINCE_CENTROIDS: Record<string, [number, number]> = {
+  'kinshasa': [-4.325, 15.3222],
+  'nord-kivu': [-1.68, 29.22],
+  'sud-kivu': [-2.5, 28.86],
+  'ituri': [1.56, 30.25],
+  'equateur': [0.16, 18.25],
+  'tshuapa': [-0.5, 22.0],
+  'tshopo': [0.5, 25.0],
+  'bas-uele': [2.8, 25.0],
+  'haut-uele': [3.2, 28.5],
+  'maniema': [-2.5, 26.0],
+  'sankuru': [-3.0, 23.5],
+  'kasai-oriental': [-6.15, 23.6],
+  'lomami': [-6.5, 24.8],
+  'kabinda': [-6.13, 24.48],
+  'kasai': [-5.0, 21.5],
+  'kasai-central': [-6.0, 22.25],
+  'kwilu': [-4.5, 18.75],
+  'kwango': [-6.0, 17.5],
+  'maiko': [-1.0, 28.0],
+  'mai-ndombe': [-2.0, 18.5],
+  'kongo-central': [-5.25, 14.0],
+  'mongala': [2.0, 21.5],
+  'nord-ubangi': [3.5, 21.0],
+  'sud-ubangi': [3.0, 19.5]
+};
+
 export const MapPage: React.FC = () => {
   const { healthCenters, isOnline, selectedDisease } = useApp();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -29,7 +65,7 @@ export const MapPage: React.FC = () => {
   const healthZoneGroupRef = useRef<L.LayerGroup | null>(null);
 
   const [selectedProvince, setSelectedProvince] = useState<string>('RDC - Global');
-  const [provinceStats, setProvinceStats] = useState<any>(null);
+  const [provinceStats, setProvinceStats] = useState<ProvinceStatsPayload | null>(null);
   const [statsLoading, setStatsLoading] = useState<boolean>(false);
   const [riskMap, setRiskMap] = useState<Record<string, ProvinceRiskData>>({});
 
@@ -43,43 +79,14 @@ export const MapPage: React.FC = () => {
   const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
   const [showLayerPanel, setShowLayerPanel] = useState<boolean>(false);
 
-  const provinceCentroids: Record<string, [number, number]> = {
-    'kinshasa': [-4.325, 15.3222],
-    'nord-kivu': [-1.68, 29.22],
-    'sud-kivu': [-2.5, 28.86],
-    'ituri': [1.56, 30.25],
-    'equateur': [0.16, 18.25],
-    'tshuapa': [-0.5, 22.0],
-    'tshopo': [0.5, 25.0],
-    'bas-uele': [2.8, 25.0],
-    'haut-uele': [3.2, 28.5],
-    'maniema': [-2.5, 26.0],
-    'sankuru': [-3.0, 23.5],
-    'kasai-oriental': [-6.15, 23.6],
-    'lomami': [-6.5, 24.8],
-    'kabinda': [-6.13, 24.48],
-    'tanganyika': [-6.25, 28.0],
-    'haut-lomami': [-8.5, 25.5],
-    'lualaba': [-10.5, 25.0],
-    'haut-katanga': [-11.66, 27.48],
-    'kasai': [-5.0, 21.5],
-    'kasai-central': [-6.0, 22.25],
-    'kwilu': [-4.5, 18.75],
-    'kwango': [-6.0, 17.5],
-    'maiko': [-1.0, 28.0],
-    'mai-ndombe': [-2.0, 18.5],
-    'kongo-central': [-5.25, 14.0],
-    'mongala': [2.0, 21.5],
-    'nord-ubangi': [3.5, 21.0],
-    'sud-ubangi': [3.0, 19.5]
-  };
-
   const getRiskColor = (level: RiskLevel): string => {
     switch (level) {
       case 'VERY_HIGH': return '#EF4444'; // Red
       case 'HIGH': return '#F97316';      // Orange
       case 'MODERATE': return '#F59E0B';  // Yellow
-      case 'LOW': default: return '#10B981'; // Green
+      case 'LOW': return '#10B981';       // Green (Confirmed zero by surveillance)
+      case 'NOT_ASSESSED': return '#64748B'; // Slate (No data in DB)
+      case 'DATA_UNAVAILABLE': default: return '#94A3B8'; // Light slate (Error)
     }
   };
 
@@ -88,94 +95,98 @@ export const MapPage: React.FC = () => {
   };
 
   // 1. Calculate Province Risk from Supabase stats & submissions
-  const loadRiskData = useCallback(async () => {
-    const riskMapData: Record<string, ProvinceRiskData> = {};
-    try {
-      if (isOnline) {
-        let query = supabase.from('stats_updates').select();
-        if (selectedDisease?.code) {
-          query = query.eq('disease_code', selectedDisease.code);
-        }
-        const { data } = await query;
-        if (data && data.length > 0) {
-          data.forEach((row: any) => {
-            const key = normalizeKey(row.province || '');
-            const confirmed = row.confirmed_cases || 0;
-            const newCases = row.new_cases || 0;
-            const deaths = row.total_deaths || 0;
-            const suspected = row.suspected_cases || 0;
-            const recoveries = row.recoveries || 0;
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRisk = async () => {
+      const riskMapData: Record<string, ProvinceRiskData> = {};
+      let queryFailed = false;
 
-            let riskLevel: RiskLevel = 'LOW';
-            if (confirmed > 50 || newCases > 10 || deaths > 20) riskLevel = 'VERY_HIGH';
-            else if (confirmed > 10 || suspected > 10) riskLevel = 'HIGH';
-            else if (confirmed > 0 || suspected > 0) riskLevel = 'MODERATE';
+      try {
+        if (isOnline) {
+          let query = supabase.from('stats_updates').select();
+          if (selectedDisease?.code) {
+            query = query.eq('disease_code', selectedDisease.code);
+          }
+          const { data, error } = await query;
+          if (error) {
+            queryFailed = true;
+          } else if (data && data.length > 0) {
+            data.forEach((row: { province?: string; confirmed_cases?: number; new_cases?: number; total_deaths?: number; suspected_cases?: number; recoveries?: number; created_at?: string }) => {
+              const key = normalizeKey(row.province || '');
+              const confirmed = row.confirmed_cases || 0;
+              const newCases = row.new_cases || 0;
+              const deaths = row.total_deaths || 0;
+              const suspected = row.suspected_cases || 0;
+              const recoveries = row.recoveries || 0;
 
-            riskMapData[key] = {
-              province: row.province,
-              confirmedCases: confirmed,
-              suspectedCases: suspected,
-              activeCases: Math.max(0, confirmed + suspected - deaths - recoveries),
-              deaths,
-              recoveries,
-              riskLevel,
-              lastUpdate: new Date(row.created_at || Date.now()).toLocaleDateString('fr-FR')
-            };
-          });
+              const recordAgeDays = row.created_at ? (Date.now() - new Date(row.created_at).getTime()) / (1000 * 60 * 60 * 24) : 999;
+              const isSurveillanceActive = recordAgeDays <= 30;
+
+              let riskLevel: RiskLevel;
+              if (confirmed > 50 || newCases > 10 || deaths > 20) {
+                riskLevel = 'VERY_HIGH';
+              } else if (confirmed > 10 || suspected > 10) {
+                riskLevel = 'HIGH';
+              } else if (confirmed > 0 || suspected > 0) {
+                riskLevel = 'MODERATE';
+              } else if (isSurveillanceActive) {
+                riskLevel = 'LOW';
+              } else {
+                riskLevel = 'NOT_ASSESSED';
+              }
+
+              riskMapData[key] = {
+                province: row.province || '',
+                confirmedCases: confirmed,
+                suspectedCases: suspected,
+                activeCases: Math.max(0, confirmed + suspected - deaths - recoveries),
+                deaths,
+                recoveries,
+                riskLevel,
+                lastUpdate: row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : 'Non daté'
+              };
+            });
+          }
         }
+      } catch (e) {
+        console.error('Error loading GIS risk data:', e);
+        queryFailed = true;
       }
-    } catch (e) {
-      console.error('Error loading GIS risk data:', e);
-    }
 
-    // Default fallback risk data for major hotspots if table empty for specific pathogen
-    if (Object.keys(riskMapData).length === 0) {
-      const defaultHighRisk = selectedDisease?.code === 'MARV' ? ['ituri', 'nord-kivu'] : ['nord-kivu', 'ituri', 'kinshasa'];
-      const defaultModRisk = ['equateur', 'sud-kivu', 'kongo-central', 'tshopo'];
-
-      Object.keys(provinceCentroids).forEach(key => {
-        let level: RiskLevel = 'LOW';
-        let confirmed = 0;
-        let suspected = 0;
-        let deaths = 0;
-
-        if (defaultHighRisk.includes(key)) {
-          level = 'VERY_HIGH';
-          confirmed = 117;
-          suspected = 24;
-          deaths = 45;
-        } else if (defaultModRisk.includes(key)) {
-          level = 'MODERATE';
-          confirmed = 12;
-          suspected = 8;
-          deaths = 2;
+      // Honest empty risk baseline: NOT_ASSESSED when missing from DB, DATA_UNAVAILABLE on error
+      Object.keys(PROVINCE_CENTROIDS).forEach(key => {
+        if (!riskMapData[key]) {
+          riskMapData[key] = {
+            province: key.charAt(0).toUpperCase() + key.slice(1),
+            confirmedCases: 0,
+            suspectedCases: 0,
+            activeCases: 0,
+            deaths: 0,
+            recoveries: 0,
+            riskLevel: queryFailed ? 'DATA_UNAVAILABLE' : 'NOT_ASSESSED',
+            lastUpdate: queryFailed ? 'Erreur synchronisation' : 'Non évalué'
+          };
         }
-
-        riskMapData[key] = {
-          province: key.charAt(0).toUpperCase() + key.slice(1),
-          confirmedCases: confirmed,
-          suspectedCases: suspected,
-          activeCases: confirmed + suspected - deaths,
-          deaths,
-          recoveries: 4,
-          riskLevel: level,
-          lastUpdate: new Date().toLocaleDateString('fr-FR')
-        };
       });
-    }
 
-    setRiskMap(riskMapData);
+      if (isMounted) {
+        setRiskMap(riskMapData);
+      }
+    };
+
+    void fetchRisk();
+    return () => { isMounted = false; };
   }, [isOnline, selectedDisease]);
 
-  const handleSelectProvince = (provName: string) => {
+  const handleSelectProvince = useCallback((provName: string) => {
     setSelectedProvince(provName);
     const key = normalizeKey(provName);
-    if (provinceCentroids[key] && mapRef.current) {
-      mapRef.current.flyTo(provinceCentroids[key], 7, { animate: true, duration: 1 });
+    if (PROVINCE_CENTROIDS[key] && mapRef.current) {
+      mapRef.current.flyTo(PROVINCE_CENTROIDS[key], 7, { animate: true, duration: 1 });
     }
-  };
+  }, []);
 
-  const fetchProvinceDetails = async (provinceName: string) => {
+  const fetchProvinceDetails = useCallback(async (provinceName: string) => {
     setStatsLoading(true);
     try {
       const key = normalizeKey(provinceName);
@@ -215,11 +226,7 @@ export const MapPage: React.FC = () => {
     } finally {
       setStatsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadRiskData();
-  }, [loadRiskData]);
+  }, [isOnline, riskMap, selectedDisease]);
 
   // Main Leaflet Map Initialization & Rendering
   useEffect(() => {
@@ -260,11 +267,12 @@ export const MapPage: React.FC = () => {
 
         if (showProvinces) {
           geojsonLayerRef.current = L.geoJSON(data, {
-            style: (feature: any) => {
-              const name = feature.properties.name || feature.properties.province || '';
+            style: (feature?: GeoJSON.Feature) => {
+              const props = (feature?.properties || {}) as Record<string, string>;
+              const name = props.name || props.province || '';
               const key = normalizeKey(name);
               const rData = riskMap[key];
-              const fillColor = rData ? getRiskColor(rData.riskLevel) : '#10B981';
+              const fillColor = rData ? getRiskColor(rData.riskLevel) : '#64748B';
 
               return {
                 fillColor,
@@ -274,17 +282,19 @@ export const MapPage: React.FC = () => {
                 fillOpacity: 0.35
               };
             },
-            onEachFeature: (feature: any, layer: any) => {
-              const provinceName = feature.properties.name || feature.properties.province || 'Province';
+            onEachFeature: (feature: GeoJSON.Feature, layer: L.Layer) => {
+              const props = (feature?.properties || {}) as Record<string, string>;
+              const provinceName = props.name || props.province || 'Province';
               const key = normalizeKey(provinceName);
               const rData = riskMap[key] || {
+                province: provinceName,
                 confirmedCases: 0,
                 suspectedCases: 0,
                 activeCases: 0,
                 deaths: 0,
                 recoveries: 0,
-                riskLevel: 'LOW',
-                lastUpdate: 'Aujourd\'hui'
+                riskLevel: 'NOT_ASSESSED',
+                lastUpdate: 'Non évalué'
               };
 
               const popupHtml = `
@@ -307,16 +317,19 @@ export const MapPage: React.FC = () => {
               layer.bindPopup(popupHtml);
 
               layer.on({
-                mouseover: (e: any) => {
-                  e.target.setStyle({ fillOpacity: 0.65, weight: 2.5, color: '#10B981' });
+                mouseover: (e: L.LeafletMouseEvent) => {
+                  const target = e.target as L.Path;
+                  if (target.setStyle) {
+                    target.setStyle({ fillOpacity: 0.65, weight: 2.5, color: '#10B981' });
+                  }
                 },
-                mouseout: (e: any) => {
+                mouseout: (e: L.LeafletMouseEvent) => {
                   if (geojsonLayerRef.current) geojsonLayerRef.current.resetStyle(e.target);
                 },
-                click: (e: any) => {
+                click: (e: L.LeafletMouseEvent) => {
                   handleSelectProvince(provinceName);
                   fetchProvinceDetails(provinceName);
-                  if (mapRef.current) {
+                  if (mapRef.current && e.target.getBounds) {
                     mapRef.current.fitBounds(e.target.getBounds(), { padding: [40, 40] });
                   }
                 }
@@ -351,7 +364,7 @@ export const MapPage: React.FC = () => {
       }
 
       // Confirmed & Suspected Cases Markers
-      Object.entries(provinceCentroids).forEach(([key, coords]) => {
+      Object.entries(PROVINCE_CENTROIDS).forEach(([key, coords]) => {
         const rData = riskMap[key];
         if (rData && (rData.confirmedCases > 0 || rData.suspectedCases > 0)) {
           // Confirmed cases markers
@@ -382,7 +395,7 @@ export const MapPage: React.FC = () => {
       heatmapGroupRef.current.clearLayers();
 
       if (showHeatmap) {
-        Object.entries(provinceCentroids).forEach(([key, coords]) => {
+        Object.entries(PROVINCE_CENTROIDS).forEach(([key, coords]) => {
           const rData = riskMap[key];
           if (rData && (rData.riskLevel === 'VERY_HIGH' || rData.riskLevel === 'HIGH' || rData.confirmedCases > 0)) {
             const radius = rData.riskLevel === 'VERY_HIGH' ? 60000 : 35000;
@@ -405,7 +418,7 @@ export const MapPage: React.FC = () => {
       healthZoneGroupRef.current.clearLayers();
 
       if (showHealthZones || showHealthAreas) {
-        Object.entries(provinceCentroids).forEach(([key, coords]) => {
+        Object.entries(PROVINCE_CENTROIDS).forEach(([key, coords]) => {
           const rData = riskMap[key];
           if (rData && (rData.confirmedCases > 0 || rData.suspectedCases > 0)) {
             const zoneColor = getRiskColor(rData.riskLevel);
@@ -431,7 +444,7 @@ export const MapPage: React.FC = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [healthCenters, selectedDisease, riskMap, showProvinces, showHealthZones, showHealthAreas, showFacilities, showConfirmed, showSuspected, showHeatmap]);
+  }, [healthCenters, selectedDisease, riskMap, showProvinces, showHealthZones, showHealthAreas, showFacilities, showConfirmed, showSuspected, showHeatmap, fetchProvinceDetails, handleSelectProvince]);
 
   return (
     <div style={{ width: '100%', height: 'calc(100vh - 120px)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
