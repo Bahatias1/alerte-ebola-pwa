@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "tsx --test tests/formPayload.test.ts tests/outboxStatus.test.ts",
+    "test": "npx tsx --test tests/formPayload.test.ts tests/outboxStatus.test.ts tests/mapRiskLevel.test.ts tests/authSecurity.test.ts",
     "typecheck": "tsc -b"
   },
   "dependencies": {
